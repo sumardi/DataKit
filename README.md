@@ -1,9 +1,7 @@
 Don't reinvent the wheel every time you need a web backend for your apps, add one with **DataKit** in minutes!
 
 Just spin up a server with [node](http://nodejs.org) and [MongoDB](http://www.mongodb.org) installed,
-integrate the SDK into your app and you are ready to go! **DataKit** requires iOS 5 and ARC.
-
-Have a look at the SDK [Docs](http://eaigner.github.com/DataKit/).
+integrate the SDK into your app and you are ready to go! Have a look at the SDK [Docs](http://eaigner.github.com/DataKit/). **DataKit** requires iOS 5 and ARC.
 
 **Author**: Erik Aigner [@eaignr](https://twitter.com/#!/eaignr)
 
@@ -35,10 +33,10 @@ require('datakit').run({
   'secret': '66e5977931c7e48aa89c9da0ae5d3ffdff7f1a58e6819cbea062dda1fa050296',
   'salt': 'mySecretSauce',
   'mongoURI': 'mongodb://<user>:<pass>@<host>:<port>/<dbName>',
-  'port': 5000, // The port DataKit runs on
+  'port': 3000, // The port DataKit runs on
   'path': 'v1', // The root API path to append to the host, defauts to empty string
   'allowDestroy': false, // Flag if the server allows destroying entity collections
-  'allowDrop': false, // Flag if the server allows collection drop
+  'allowDrop': false, // Flag if the server allows db drop
   'cert': 'path/to/cert', // SSL certificate
   'key': 'path/to/key', // SSL key
   'express': function (app) { /* Add your custom configuration to the express app */}
