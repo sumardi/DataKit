@@ -176,6 +176,11 @@ DKSynthesize(bytesExpected)
     [req setValue:name_ forHTTPHeaderField:kDKRequestHeaderFileName];
   }
   
+  // Log
+  if ([DKManager requestLogEnabled]) {
+    NSLog(@"[FILE] save '%@' (%u bytes)", self.name, self.data.length);
+  }
+  
   // Save synchronous
   if (saveSync) {
     NSError *reqError = nil;
@@ -252,6 +257,11 @@ DKSynthesize(bytesExpected)
   [req setValue:[DKManager APISecret] forHTTPHeaderField:kDKRequestHeaderSecret];
   if (self.name.length > 0) {
     [req setValue:self.name forHTTPHeaderField:kDKRequestHeaderFileName];
+  }
+  
+  // Log
+  if ([DKManager requestLogEnabled]) {
+    NSLog(@"[FILE] load '%@'", self.name);
   }
   
   // Load sync
