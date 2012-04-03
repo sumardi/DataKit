@@ -329,7 +329,12 @@ DKSynthesize(bytesExpected)
 }
 
 - (NSURL *)generatePublicURL:(NSError **)error {
-  if (self.name.length == 0 || self.isVolatile) {
+  if (self.name.length == 0) {
+    if (error != NULL) {
+      NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Invalid file name", nil)
+                                                           forKey:NSLocalizedDescriptionKey];
+      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:userInfo];
+    }
     return nil;
   }
   
