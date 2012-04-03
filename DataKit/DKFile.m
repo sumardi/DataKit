@@ -355,11 +355,12 @@ DKSynthesize(bytesExpected)
     return nil;
   }
   
+  NSString *ep = [DKManager APIEndpoint];
   NSString *key = [dict objectForKey:@"key"];
   NSString *path = [@"public" stringByAppendingPathComponent:key];
-  NSString *ep = [[DKManager APIEndpoint] stringByAppendingPathComponent:path];
+  NSString *absoluteString = [NSString stringWithFormat:@"%@/%@", ep, path];
   
-  return [NSURL URLWithString:ep]; 
+  return [NSURL URLWithString:absoluteString]; 
 }
 
 - (void)generatePublicURLInBackgroundWithBlock:(void (^)(NSURL *publicURL, NSError *error))block {
