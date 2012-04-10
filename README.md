@@ -108,4 +108,5 @@ DKFile *loadMe = [DKFile fileWithName:@"SomeFile"];
 
 ### TODO
 
+- Add some sort of ACL and user authentication instead of shared secret
 - Add `DKChannel` class for push notifications and async messaging
