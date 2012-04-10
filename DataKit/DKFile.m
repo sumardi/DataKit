@@ -10,9 +10,11 @@
 
 #import "DKManager.h"
 #import "DKRequest.h"
+#import "UIApplication+DKNetworkActivity.h"
 
 @interface DKFile ()
 @property (nonatomic, assign, readwrite) BOOL isVolatile;
+@property (nonatomic, assign, readwrite) BOOL isLoading;
 @property (nonatomic, copy, readwrite) NSString *name;
 @property (nonatomic, strong, readwrite) NSData *data;
 @property (nonatomic, strong) NSURLConnection *connection;
@@ -28,6 +30,7 @@
 
 @implementation DKFile
 DKSynthesize(isVolatile)
+DKSynthesize(isLoading)
 DKSynthesize(name)
 DKSynthesize(data)
 DKSynthesize(connection)
@@ -181,12 +184,21 @@ DKSynthesize(bytesExpected)
     NSLog(@"[FILE] save '%@' (%u bytes)", self.name, self.data.length);
   }
   
+  // Start network activity indicator
+  self.isLoading = YES;
+  [UIApplication beginNetworkActivity];
+  
   // Save synchronous
   if (saveSync) {
     NSError *reqError = nil;
     NSHTTPURLResponse *response = nil;
     NSData *data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&reqError];
     
+    // End network activity
+    self.isLoading = NO;
+    [UIApplication endNetworkActivity];
+    
+    // Parse response
     NSError *parseErr = nil;
     [DKRequest parseResponse:response withData:data error:&parseErr];
     
@@ -264,11 +276,19 @@ DKSynthesize(bytesExpected)
     NSLog(@"[FILE] load '%@'", self.name);
   }
   
+  // Start network activity indicator
+  self.isLoading = YES;
+  [UIApplication beginNetworkActivity];
+  
   // Load sync
   if (loadSync) {
     NSError *reqError = nil;
     NSHTTPURLResponse *response = nil;
     NSData *data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&reqError];
+    
+    // End network activity
+    self.isLoading = NO;
+    [UIApplication endNetworkActivity];
     
     if (response.statusCode == 200) {
       self.isVolatile = NO;
@@ -320,6 +340,14 @@ DKSynthesize(bytesExpected)
 - (void)abort {
   [self.connection cancel];
   [self closeStreamAndCleanUpTempFiles];
+  
+  // When the connection is cancelled we will not receive any delegate messages,
+  // so we have to end the network activity manually.
+  if (self.isLoading) {
+    self.isLoading = NO;
+    [UIApplication endNetworkActivity];
+  }
+  
   if (self.saveResultBlock != nil) {
     self.saveResultBlock(NO, nil);
   }
@@ -407,6 +435,10 @@ DKSynthesize(bytesExpected)
 #pragma mark - NSURLConnectionDelegate
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+  // End network activity
+  self.isLoading = NO;
+  [UIApplication endNetworkActivity];
+  
   if (self.saveResultBlock != nil) {
     self.saveResultBlock(NO, error);
   }
@@ -430,6 +462,10 @@ DKSynthesize(bytesExpected)
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+  // End network activity
+  self.isLoading = NO;
+  [UIApplication endNetworkActivity];
+  
   if (self.loadResultBlock != nil) {
     self.loadResultBlock(YES, [NSData dataWithContentsOfURL:self.fileURL], nil);
   }

@@ -20,6 +20,11 @@
 @property (nonatomic, assign, readonly) BOOL isVolatile;
 
 /**
+ If 'YES' the file is currently loading (or saving), `NO` otherwise.
+ */
+@property (nonatomic, assign, readonly) BOOL isLoading;
+
+/**
  The file name (must be unique)
  */
 @property (nonatomic, copy, readonly) NSString *name;

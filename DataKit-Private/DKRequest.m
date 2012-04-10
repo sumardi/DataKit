@@ -11,6 +11,7 @@
 #import "DKManager.h"
 #import "DKRelation.h"
 #import "NSError+DataKit.h"
+#import "UIApplication+DKNetworkActivity.h"
 
 
 @interface DKRequest ()
@@ -101,7 +102,11 @@ DKSynthesize(cachePolicy)
   // Log request
   [isa logData:bodyData isOut:YES];
   
+  [UIApplication beginNetworkActivity];
+  
   NSData *result = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&requestError];
+  
+  [UIApplication endNetworkActivity];
   
   // Check for request errors
   if (requestError != nil) {

@@ -54,6 +54,8 @@
 		DC61AC7C14FCFE3B003A9057 /* NSString+DataKit.h in Headers */ = {isa = PBXBuildFile; fileRef = DC61AC7A14FCFE3B003A9057 /* NSString+DataKit.h */; };
 		DC61AC7D14FCFE3B003A9057 /* NSString+DataKit.m in Sources */ = {isa = PBXBuildFile; fileRef = DC61AC7B14FCFE3B003A9057 /* NSString+DataKit.m */; };
 		DC78ACA51503C3DA00CC6BCD /* DKEntityEncodeDecodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC78ACA41503C3DA00CC6BCD /* DKEntityEncodeDecodeTests.m */; };
+		DC80DAC61534293700A6857A /* UIApplication+DKNetworkActivity.h in Headers */ = {isa = PBXBuildFile; fileRef = DC80DAC41534293700A6857A /* UIApplication+DKNetworkActivity.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DC80DAC71534293700A6857A /* UIApplication+DKNetworkActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = DC80DAC51534293700A6857A /* UIApplication+DKNetworkActivity.m */; };
 		DC83051D1504D89300D6AB1C /* DKRelationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC83051C1504D89300D6AB1C /* DKRelationTests.m */; };
 		DC8305201505127B00D6AB1C /* DKQueryTableViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = DC83051E1505127B00D6AB1C /* DKQueryTableViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC8305211505127B00D6AB1C /* DKQueryTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DC83051F1505127B00D6AB1C /* DKQueryTableViewController.m */; };
@@ -121,6 +123,8 @@
 		DC61AC7B14FCFE3B003A9057 /* NSString+DataKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DataKit.m"; sourceTree = "<group>"; };
 		DC78ACA31503C3DA00CC6BCD /* DKEntityEncodeDecodeTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKEntityEncodeDecodeTests.h; sourceTree = "<group>"; };
 		DC78ACA41503C3DA00CC6BCD /* DKEntityEncodeDecodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKEntityEncodeDecodeTests.m; sourceTree = "<group>"; };
+		DC80DAC41534293700A6857A /* UIApplication+DKNetworkActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIApplication+DKNetworkActivity.h"; path = "DataKit-Private/UIApplication+DKNetworkActivity.h"; sourceTree = SOURCE_ROOT; };
+		DC80DAC51534293700A6857A /* UIApplication+DKNetworkActivity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIApplication+DKNetworkActivity.m"; path = "DataKit-Private/UIApplication+DKNetworkActivity.m"; sourceTree = SOURCE_ROOT; };
 		DC83051B1504D89300D6AB1C /* DKRelationTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKRelationTests.h; sourceTree = "<group>"; };
 		DC83051C1504D89300D6AB1C /* DKRelationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKRelationTests.m; sourceTree = "<group>"; };
 		DC83051E1505127B00D6AB1C /* DKQueryTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKQueryTableViewController.h; sourceTree = "<group>"; };
@@ -210,6 +214,8 @@
 				DC83051F1505127B00D6AB1C /* DKQueryTableViewController.m */,
 				DC275A75150FD58200FE7BD4 /* DKFile.h */,
 				DC275A76150FD58200FE7BD4 /* DKFile.m */,
+				DC80DAC41534293700A6857A /* UIApplication+DKNetworkActivity.h */,
+				DC80DAC51534293700A6857A /* UIApplication+DKNetworkActivity.m */,
 			);
 			path = DataKit;
 			sourceTree = "<group>";
@@ -283,6 +289,7 @@
 				DC8305201505127B00D6AB1C /* DKQueryTableViewController.h in Headers */,
 				DC3AB9FB150CAC7700BFD319 /* DKMapReduce.h in Headers */,
 				DC275A77150FD58200FE7BD4 /* DKFile.h in Headers */,
+				DC80DAC61534293700A6857A /* UIApplication+DKNetworkActivity.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +431,7 @@
 				DC8305211505127B00D6AB1C /* DKQueryTableViewController.m in Sources */,
 				DC3AB9FC150CAC7700BFD319 /* DKMapReduce.m in Sources */,
 				DC275A78150FD58200FE7BD4 /* DKFile.m in Sources */,
+				DC80DAC71534293700A6857A /* UIApplication+DKNetworkActivity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
