@@ -10,7 +10,7 @@
 
 #import "DKManager.h"
 #import "DKRequest.h"
-#import "UIApplication+DKNetworkActivity.h"
+#import "DKNetworkActivity.h"
 
 @interface DKFile ()
 @property (nonatomic, assign, readwrite) BOOL isVolatile;
@@ -186,7 +186,7 @@ DKSynthesize(bytesExpected)
   
   // Start network activity indicator
   self.isLoading = YES;
-  [UIApplication beginNetworkActivity];
+  [DKNetworkActivity begin];
   
   // Save synchronous
   if (saveSync) {
@@ -196,7 +196,7 @@ DKSynthesize(bytesExpected)
     
     // End network activity
     self.isLoading = NO;
-    [UIApplication endNetworkActivity];
+    [DKNetworkActivity end];
     
     // Parse response
     NSError *parseErr = nil;
@@ -278,7 +278,7 @@ DKSynthesize(bytesExpected)
   
   // Start network activity indicator
   self.isLoading = YES;
-  [UIApplication beginNetworkActivity];
+  [DKNetworkActivity begin];
   
   // Load sync
   if (loadSync) {
@@ -288,7 +288,7 @@ DKSynthesize(bytesExpected)
     
     // End network activity
     self.isLoading = NO;
-    [UIApplication endNetworkActivity];
+    [DKNetworkActivity end];
     
     if (response.statusCode == 200) {
       self.isVolatile = NO;
@@ -345,7 +345,7 @@ DKSynthesize(bytesExpected)
   // so we have to end the network activity manually.
   if (self.isLoading) {
     self.isLoading = NO;
-    [UIApplication endNetworkActivity];
+    [DKNetworkActivity end];
   }
   
   if (self.saveResultBlock != nil) {
@@ -437,7 +437,7 @@ DKSynthesize(bytesExpected)
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
   // End network activity
   self.isLoading = NO;
-  [UIApplication endNetworkActivity];
+  [DKNetworkActivity end];
   
   if (self.saveResultBlock != nil) {
     self.saveResultBlock(NO, error);
@@ -464,7 +464,7 @@ DKSynthesize(bytesExpected)
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
   // End network activity
   self.isLoading = NO;
-  [UIApplication endNetworkActivity];
+  [DKNetworkActivity end];
   
   if (self.loadResultBlock != nil) {
     self.loadResultBlock(YES, [NSData dataWithContentsOfURL:self.fileURL], nil);
