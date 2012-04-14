@@ -15,6 +15,8 @@
 @property (nonatomic, assign, readwrite) BOOL isLoading;
 @property (nonatomic, assign) NSUInteger currentOffset;
 @property (nonatomic, strong, readwrite) NSMutableArray *objects;
+@property (nonatomic, strong, readwrite) UISearchBar *searchBar;
+@property (nonatomic, strong) UIButton *searchOverlay;
 @end
 
 @interface DKEntityTableNextPageCell : UITableViewCell
@@ -28,6 +30,8 @@ DKSynthesize(displayedImageKey)
 DKSynthesize(objectsPerPage)
 DKSynthesize(isLoading)
 DKSynthesize(objects)
+DKSynthesize(searchBar)
+DKSynthesize(searchOverlay)
 DKSynthesize(hasMore)
 DKSynthesize(currentOffset)
 
@@ -43,11 +47,24 @@ DKSynthesize(currentOffset)
     self.currentOffset = 0;
     self.entityName = entityName;
     self.objects = [NSMutableArray new];
+    
+    // Search bar
+    self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+    self.searchBar.delegate = (id)self;
+    self.searchBar.placeholder = NSLocalizedString(@"Search", nil);
+    
+    // Search overlay
+    self.searchOverlay = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.searchOverlay.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
+    
+    [self.searchOverlay addTarget:self action:@selector(dismissOverlay:) forControlEvents:UIControlEventTouchUpInside];
   }
   return self;
 }
 
 - (void)processQueryResults:(NSArray *)results error:(NSError *)error callback:(void (^)(NSError *error))callback {
+  NSAssert(dispatch_get_current_queue() == dispatch_get_main_queue(), @"query results not processed on main queue");
+  
   if (results != nil && ![results isKindOfClass:[NSArray class]]) {
     [NSException raise:NSInternalInconsistencyException
                 format:NSLocalizedString(@"Query did not return a result NSArray or nil", nil)];
@@ -91,12 +108,27 @@ DKSynthesize(currentOffset)
 
 - (void)appendNextPageWithFinishCallback:(void (^)(NSError *error))callback {
   callback = [callback copy];
-  DKQuery *q = [self tableQuery];
-  q.skip = self.currentOffset;
-  q.limit = self.objectsPerPage;
   
   self.isLoading = YES;
   self.tableView.userInteractionEnabled = NO;
+  
+  DKQuery *q = nil;
+  NSString *queryText = self.searchBar.text;
+  
+  // Form search query for text if possible
+  if ([self hasSearchBar] && queryText.length > 0) {
+    q = [self tableQueryForSearchText:self.searchBar.text];
+  }
+  
+  // Otherwise use default query
+  if (q == nil) {
+    q = [self tableQuery];
+  }
+  
+  NSAssert(q != nil, @"query cannot be nil");
+  
+  q.skip = self.currentOffset;
+  q.limit = self.objectsPerPage;
   
   DKMapReduce *mr = [self tableQueryMapReduce];
   if (mr != nil) {
@@ -116,9 +148,18 @@ DKSynthesize(currentOffset)
 }
 
 - (void)reloadInBackgroundWithBlock:(void (^)(NSError *))block {
+  // Display search bar if necessary
+  if ([self hasSearchBar]) {
+    self.tableView.tableHeaderView = self.searchBar;
+  } else {
+    [self.searchOverlay removeFromSuperview];
+    self.tableView.tableHeaderView = nil;
+  }
+  
   self.hasMore = YES;
   self.currentOffset = 0;
   [self.objects removeAllObjects];
+  
   [self appendNextPageWithFinishCallback:block];
 }
 
@@ -141,6 +182,14 @@ DKSynthesize(currentOffset)
   return nil;
 }
 
+- (BOOL)hasSearchBar {
+  return NO;
+}
+
+- (DKQuery *)tableQueryForSearchText:(NSString *)text {
+  return nil;
+}
+
 - (void)loadNextPageWithNextPageCell:(DKEntityTableNextPageCell *)cell {
   if (self.isLoading) {
     return;
@@ -153,6 +202,8 @@ DKSynthesize(currentOffset)
     [cell setNeedsLayout];
   }];
 }
+
+#pragma mark UITableViewDelegate & Related
 
 - (BOOL)tableViewCellIsNextPageCellAtIndexPath:(NSIndexPath *)indexPath {
   return (self.hasMore && (indexPath.row == self.objects.count));
@@ -213,6 +264,34 @@ DKSynthesize(currentOffset)
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath object:(id)object {
   // stub
+}
+
+#pragma mark UISearchBarDelegate & Overlay
+
+- (void)dismissOverlay:(UIButton *)sender {
+  [sender removeFromSuperview];
+  self.searchBar.text = nil;
+  [self.searchBar resignFirstResponder];
+  [self reloadInBackground];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+  [self.searchOverlay removeFromSuperview];
+  [self.searchBar resignFirstResponder];
+  [self reloadInBackground];
+}
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+  CGRect bounds = self.tableView.bounds;
+  CGRect barBounds = self.searchBar.bounds;
+  CGRect overlayFrame = CGRectMake(CGRectGetMinX(bounds),
+                                   CGRectGetMaxY(barBounds),
+                                   CGRectGetWidth(barBounds),
+                                   CGRectGetHeight(bounds) - CGRectGetHeight(barBounds));
+  
+  self.searchOverlay.frame = overlayFrame;
+  
+  [self.tableView addSubview:self.searchOverlay];
 }
 
 @end

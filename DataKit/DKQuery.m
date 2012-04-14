@@ -160,9 +160,13 @@ DKSynthesize(fieldInclExcl)
   }
 }
 
-- (void)whereKey:(NSString *)key containsString:(NSString *)string {
+- (void)whereKey:(NSString *)key containsString:(NSString *)string caseInsensitive:(BOOL)caseInsensitive {
   NSString *safeString = [self makeRegexSafeString:string];
-  [self whereKey:key matchesRegex:safeString];
+  DKRegexOption opts = DKRegexOptionMultiline;
+  if (caseInsensitive) {
+    opts |= DKRegexOptionCaseInsensitive;
+  }
+  [self whereKey:key matchesRegex:safeString options:opts];
 }
 
 - (void)whereKey:(NSString *)key hasPrefix:(NSString *)prefix {

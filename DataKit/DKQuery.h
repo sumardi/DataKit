@@ -221,8 +221,9 @@
  Does not work on array fields
  @param key The entity key
  @param string The string to match
+ @param caseInsensitive `YES` if the string is case insensitive, `NO` otherwise
  */
-- (void)whereKey:(NSString *)key containsString:(NSString *)string;
+- (void)whereKey:(NSString *)key containsString:(NSString *)string caseInsensitive:(BOOL)caseInsensitive;
 
 /**
  Checks if the object for key has the given prefix

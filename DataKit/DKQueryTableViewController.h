@@ -67,6 +67,13 @@
  */
 @property (nonatomic, strong, readonly) NSMutableArray *objects;
 
+/**
+ The search bar
+ 
+ Use this property to configure it.
+ */
+@property (nonatomic, strong, readonly) UISearchBar *searchBar;
+
 /** @name Reloading */
 
 /**
@@ -93,10 +100,27 @@
 /** @name Methods to Override */
 
 /**
+ Determines if table shows a search bar in the header view
+ 
+ The search bar is updated on each reload, so this property can change any time.
+ @return `YES` if the table should display a search bar in the header, `NO` otherwise.
+ */
+- (BOOL)hasSearchBar;
+
+/**
  Specify a custom query by overriding this method
+ 
  @return The query to use for the tables objects
  */
 - (DKQuery *)tableQuery;
+
+/**
+ Returns a query for the entered search text
+ 
+ @param text The query text
+ @return The search query
+ */
+- (DKQuery *)tableQueryForSearchText:(NSString *)text;
 
 /**
  Specify a map reduce operation for the query by overriding this method
