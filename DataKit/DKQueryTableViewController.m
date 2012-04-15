@@ -270,9 +270,7 @@ DKSynthesize(currentOffset)
 
 - (void)dismissOverlay:(UIButton *)sender {
   [sender removeFromSuperview];
-  self.searchBar.text = nil;
   [self.searchBar resignFirstResponder];
-  [self reloadInBackground];
 }
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
