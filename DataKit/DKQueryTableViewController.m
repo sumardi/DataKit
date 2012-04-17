@@ -17,6 +17,7 @@
 @property (nonatomic, strong, readwrite) NSMutableArray *objects;
 @property (nonatomic, strong, readwrite) UISearchBar *searchBar;
 @property (nonatomic, strong) UIButton *searchOverlay;
+@property (nonatomic, assign) BOOL searchTextChanged;
 @end
 
 @interface DKEntityTableNextPageCell : UITableViewCell
@@ -32,6 +33,7 @@ DKSynthesize(isLoading)
 DKSynthesize(objects)
 DKSynthesize(searchBar)
 DKSynthesize(searchOverlay)
+DKSynthesize(searchTextChanged)
 DKSynthesize(hasMore)
 DKSynthesize(currentOffset)
 
@@ -163,6 +165,13 @@ DKSynthesize(currentOffset)
   [self appendNextPageWithFinishCallback:block];
 }
 
+- (void)reloadInBackgroundIfSearchTextChanged {
+  if (self.searchTextChanged) {
+    self.searchTextChanged = NO;
+    [self reloadInBackground];
+  }
+}
+
 - (void)queryTableWillReload {
   // stub
 }
@@ -271,12 +280,13 @@ DKSynthesize(currentOffset)
 - (void)dismissOverlay:(UIButton *)sender {
   [sender removeFromSuperview];
   [self.searchBar resignFirstResponder];
+  [self reloadInBackgroundIfSearchTextChanged];
 }
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
   [self.searchOverlay removeFromSuperview];
   [self.searchBar resignFirstResponder];
-  [self reloadInBackground];
+  [self reloadInBackgroundIfSearchTextChanged];
 }
 
 - (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
@@ -290,6 +300,10 @@ DKSynthesize(currentOffset)
   self.searchOverlay.frame = overlayFrame;
   
   [self.tableView addSubview:self.searchOverlay];
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+  self.searchTextChanged = YES;
 }
 
 @end
