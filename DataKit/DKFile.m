@@ -11,6 +11,7 @@
 #import "DKManager.h"
 #import "DKRequest.h"
 #import "DKNetworkActivity.h"
+#import "NSURLConnection+Timeout.h"
 
 @interface DKFile ()
 @property (nonatomic, assign, readwrite) BOOL isVolatile;
@@ -163,9 +164,6 @@ DKSynthesize(bytesExpected)
   NSURL *URL = [DKManager endpointForMethod:@"store"];
   NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:URL];
   
-  // DEVNOTE: Timeout interval is quirky
-  // https://devforums.apple.com/thread/25282
-  req.timeoutInterval = 20.0;
   req.cachePolicy = NSURLRequestReloadIgnoringLocalAndRemoteCacheData;
   req.HTTPBody = self.data;
   req.HTTPMethod = @"POST";
@@ -192,7 +190,7 @@ DKSynthesize(bytesExpected)
   if (saveSync) {
     NSError *reqError = nil;
     NSHTTPURLResponse *response = nil;
-    NSData *data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&reqError];
+    NSData *data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response timeout:20.0 error:&reqError];
     
     // End network activity
     self.isLoading = NO;
@@ -261,10 +259,6 @@ DKSynthesize(bytesExpected)
   NSURL *URL = [DKManager endpointForMethod:@"stream"];
   
   NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:URL];
-  
-  // DEVNOTE: Timeout interval is quirky
-  // https://devforums.apple.com/thread/25282
-  req.timeoutInterval = 20.0;
   req.cachePolicy = NSURLRequestReloadIgnoringLocalAndRemoteCacheData;
   [req setValue:[DKManager APISecret] forHTTPHeaderField:kDKRequestHeaderSecret];
   if (self.name.length > 0) {
@@ -284,7 +278,7 @@ DKSynthesize(bytesExpected)
   if (loadSync) {
     NSError *reqError = nil;
     NSHTTPURLResponse *response = nil;
-    NSData *data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&reqError];
+    NSData *data = [NSURLConnection sendSynchronousRequest:req returningResponse:&response timeout:20.0 error:&reqError];
     
     // End network activity
     self.isLoading = NO;

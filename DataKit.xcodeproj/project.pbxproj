@@ -62,6 +62,8 @@
 		DC830523150513A200D6AB1C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC830522150513A200D6AB1C /* UIKit.framework */; };
 		DC90FF9014FE4F9300F52435 /* DKQuery-Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DC90FF8E14FE4F9200F52435 /* DKQuery-Private.h */; };
 		DC90FF9414FE872700F52435 /* DKQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90FF9314FE872700F52435 /* DKQueryTests.m */; };
+		DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */ = {isa = PBXBuildFile; fileRef = DC957A2A1541A746008683DB /* NSURLConnection+Timeout.h */; settings = {ATTRIBUTES = (); }; };
+		DC957A2D1541A746008683DB /* NSURLConnection+Timeout.m in Sources */ = {isa = PBXBuildFile; fileRef = DC957A2B1541A746008683DB /* NSURLConnection+Timeout.m */; };
 		DCCC897714F804C600FA77A1 /* DKConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = DC5B610E14F7B21E00CC5B42 /* DKConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DCCC897814F804CA00FA77A1 /* DataKit.h in Headers */ = {isa = PBXBuildFile; fileRef = DC03846514F68EA1000DADD6 /* DataKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DCFA7AF31515C43200D631F8 /* DKFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DCFA7AF21515C43200D631F8 /* DKFileTests.m */; };
@@ -133,6 +135,8 @@
 		DC90FF8E14FE4F9200F52435 /* DKQuery-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DKQuery-Private.h"; sourceTree = "<group>"; };
 		DC90FF9214FE872700F52435 /* DKQueryTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKQueryTests.h; sourceTree = "<group>"; };
 		DC90FF9314FE872700F52435 /* DKQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKQueryTests.m; sourceTree = "<group>"; };
+		DC957A2A1541A746008683DB /* NSURLConnection+Timeout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLConnection+Timeout.h"; sourceTree = "<group>"; };
+		DC957A2B1541A746008683DB /* NSURLConnection+Timeout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLConnection+Timeout.m"; sourceTree = "<group>"; };
 		DCFA7AF11515C43200D631F8 /* DKFileTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKFileTests.h; sourceTree = "<group>"; };
 		DCFA7AF21515C43200D631F8 /* DKFileTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKFileTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -263,6 +267,8 @@
 				DC52509714FAE1DC00646185 /* NSData+DataKit.m */,
 				DC61AC7A14FCFE3B003A9057 /* NSString+DataKit.h */,
 				DC61AC7B14FCFE3B003A9057 /* NSString+DataKit.m */,
+				DC957A2A1541A746008683DB /* NSURLConnection+Timeout.h */,
+				DC957A2B1541A746008683DB /* NSURLConnection+Timeout.m */,
 			);
 			path = "DataKit-Private";
 			sourceTree = "<group>";
@@ -290,6 +296,7 @@
 				DC3AB9FB150CAC7700BFD319 /* DKMapReduce.h in Headers */,
 				DC275A77150FD58200FE7BD4 /* DKFile.h in Headers */,
 				DC80DAC61534293700A6857A /* DKNetworkActivity.h in Headers */,
+				DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,6 +439,7 @@
 				DC3AB9FC150CAC7700BFD319 /* DKMapReduce.m in Sources */,
 				DC275A78150FD58200FE7BD4 /* DKFile.m in Sources */,
 				DC80DAC71534293700A6857A /* DKNetworkActivity.m in Sources */,
+				DC957A2D1541A746008683DB /* NSURLConnection+Timeout.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

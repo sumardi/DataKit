@@ -12,6 +12,7 @@
 #import "DKRelation.h"
 #import "NSError+DataKit.h"
 #import "DKNetworkActivity.h"
+#import "NSURLConnection+Timeout.h"
 
 
 @interface DKRequest ()
@@ -104,7 +105,7 @@ DKSynthesize(cachePolicy)
   
   [DKNetworkActivity begin];
   
-  NSData *result = [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&requestError];
+  NSData *result = [NSURLConnection sendSynchronousRequest:req returningResponse:&response timeout:20.0 error:&requestError];
   
   [DKNetworkActivity end];
   
