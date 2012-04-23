@@ -62,7 +62,7 @@
 		DC830523150513A200D6AB1C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC830522150513A200D6AB1C /* UIKit.framework */; };
 		DC90FF9014FE4F9300F52435 /* DKQuery-Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DC90FF8E14FE4F9200F52435 /* DKQuery-Private.h */; };
 		DC90FF9414FE872700F52435 /* DKQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90FF9314FE872700F52435 /* DKQueryTests.m */; };
-		DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */ = {isa = PBXBuildFile; fileRef = DC957A2A1541A746008683DB /* NSURLConnection+Timeout.h */; settings = {ATTRIBUTES = (); }; };
+		DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */ = {isa = PBXBuildFile; fileRef = DC957A2A1541A746008683DB /* NSURLConnection+Timeout.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC957A2D1541A746008683DB /* NSURLConnection+Timeout.m in Sources */ = {isa = PBXBuildFile; fileRef = DC957A2B1541A746008683DB /* NSURLConnection+Timeout.m */; };
 		DCCC897714F804C600FA77A1 /* DKConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = DC5B610E14F7B21E00CC5B42 /* DKConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DCCC897814F804CA00FA77A1 /* DataKit.h in Headers */ = {isa = PBXBuildFile; fileRef = DC03846514F68EA1000DADD6 /* DataKit.h */; settings = {ATTRIBUTES = (Public, ); }; };

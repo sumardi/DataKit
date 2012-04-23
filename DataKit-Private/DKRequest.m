@@ -91,9 +91,6 @@ DKSynthesize(cachePolicy)
   [req setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
   [req setValue:[DKManager APISecret] forHTTPHeaderField:kDKRequestHeaderSecret];
   
-  NSError *requestError = nil;
-  NSHTTPURLResponse *response = nil;
-  
   // DEVNOTE: Allow untrusted certs in debug version.
   // This has to be excluded in production versions - private API!
 #ifdef CONFIGURATION_Debug
@@ -105,6 +102,8 @@ DKSynthesize(cachePolicy)
   
   [DKNetworkActivity begin];
   
+  NSError *requestError = nil;
+  NSHTTPURLResponse *response = nil;
   NSData *result = [NSURLConnection sendSynchronousRequest:req returningResponse:&response timeout:20.0 error:&requestError];
   
   [DKNetworkActivity end];

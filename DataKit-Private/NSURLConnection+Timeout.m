@@ -37,11 +37,12 @@
   
   __block BOOL finished = NO;
   __block NSData *data = nil;
-  __block NSURLResponse *internalResponse;
+  __block NSURLResponse *internalResponse = nil;
+  __block NSError *internalErr = nil;
   __block dispatch_semaphore_t sema = dispatch_semaphore_create(0);
   
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    data = [self sendSynchronousRequest:request returningResponse:&internalResponse error:error];
+    data = [self sendSynchronousRequest:request returningResponse:&internalResponse error:&internalErr];
     
     // Use the locking queue
     dispatch_sync(lockQueue, ^{
@@ -59,6 +60,12 @@
     sema = NULL;
   });
   
+  // Set error
+  if (error != NULL) {
+    *error = internalErr;
+  }
+
+  // Return data and set response
   if (finished) {
     if (response != NULL) {
       *response = internalResponse;
