@@ -37,7 +37,7 @@
   
   __block BOOL finished = NO;
   __block NSData *data = nil;
-  __block NSURLResponse *internalResponse = nil;
+  __block NSHTTPURLResponse *internalResponse = nil;
   __block NSError *internalErr = nil;
   __block dispatch_semaphore_t sema = dispatch_semaphore_create(0);
   
@@ -61,8 +61,11 @@
   });
   
   // Set error
-  if (error != NULL) {
-    *error = internalErr;
+  if (internalErr != nil) {
+    NSLog(@"error: %@ (%i)", internalErr.localizedDescription, internalErr.code);
+    if (error != NULL) {
+      *error = internalErr;
+    }
   }
 
   // Return data and set response
