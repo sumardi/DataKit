@@ -57,6 +57,11 @@
  */
 @property (nonatomic, readonly) BOOL isDirty;
 
+/**
+ An object for storing custom user information about the entity, will not be saved.
+ */
+@property (nonatomic, strong) id userInfo;
+
 /** @name Creating and Initializing Entities */
 
 /**

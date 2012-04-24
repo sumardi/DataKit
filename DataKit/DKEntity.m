@@ -25,6 +25,7 @@ DKSynthesize(addToSetMap)
 DKSynthesize(popMap)
 DKSynthesize(pullAllMap)
 DKSynthesize(resultMap)
+DKSynthesize(userInfo)
 
 #define kDKEntityIDField @"_id"
 #define kDKEntityUpdatedField @"_updated"
