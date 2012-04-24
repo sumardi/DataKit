@@ -44,7 +44,6 @@ DKSynthesize(currentOffset)
 - (id)initWithStyle:(UITableViewStyle)style entityName:(NSString *)entityName {
   self = [super initWithStyle:style];
   if (self) {
-    self.hasMore = YES;
     self.objectsPerPage = 25;
     self.currentOffset = 0;
     self.entityName = entityName;
@@ -167,7 +166,7 @@ DKSynthesize(currentOffset)
     self.tableView.tableHeaderView = nil;
   }
   
-  self.hasMore = YES;
+  self.hasMore = NO;
   self.currentOffset = 0;
   
   [self.objects removeAllObjects];
