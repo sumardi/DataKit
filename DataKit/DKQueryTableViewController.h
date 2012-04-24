@@ -97,6 +97,11 @@
  */
 - (void)queryTableDidReload;
 
+/**
+ Give subclasses a chance to do custom post processing on the table objects on a different queue.
+ */
+- (void)postProcessResults;
+
 /** @name Methods to Override */
 
 /**

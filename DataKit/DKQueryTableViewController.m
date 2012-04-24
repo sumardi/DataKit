@@ -99,13 +99,22 @@ DKSynthesize(currentOffset)
     [alert show];
   }
   
-  [self queryTableWillReload];
-  [self.tableView reloadData];
-  [self queryTableDidReload];
-  
-  if (callback != NULL) {
-    callback(error);
-  }
+  // Post process results
+  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    
+    [self postProcessResults];
+    
+    dispatch_async(q, ^{
+      [self queryTableWillReload];
+      [self.tableView reloadData];
+      [self queryTableDidReload];
+      
+      if (callback != NULL) {
+        callback(error);
+      }
+    });
+  });
 }
 
 - (void)appendNextPageWithFinishCallback:(void (^)(NSError *error))callback {
@@ -160,7 +169,9 @@ DKSynthesize(currentOffset)
   
   self.hasMore = YES;
   self.currentOffset = 0;
+  
   [self.objects removeAllObjects];
+  [self.tableView reloadData];
   
   [self appendNextPageWithFinishCallback:block];
 }
@@ -177,6 +188,10 @@ DKSynthesize(currentOffset)
 }
 
 - (void)queryTableDidReload {
+  // stub
+}
+
+- (void)postProcessResults {
   // stub
 }
 
