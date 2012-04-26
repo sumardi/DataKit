@@ -8,22 +8,21 @@
 
 #import "DKEntity.h"
 
+#define UNIMPLEMENTED_ATTRIBUTE
+
 @interface DKUser : DKEntity
-@property (nonatomic, readonly) BOOL isSignedIn;
-@property (nonatomic, readonly) BOOL isNew;
+@property (nonatomic, readonly) BOOL isSignedIn UNIMPLEMENTED_ATTRIBUTE;
+@property (nonatomic, readonly) BOOL isNew UNIMPLEMENTED_ATTRIBUTE;
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, copy, readonly) NSString *password;
 @property (nonatomic, copy, readonly) NSString *email;
 
-+ (DKUser *)lastAuthenticatedUser;
-+ (DKUser *)userWithName:(NSString *)name password:(NSString *)password email:(NSString *)email;
++ (instancetype)lastAuthenticatedUser UNIMPLEMENTED_ATTRIBUTE;
++ (instancetype)userWithName:(NSString *)name password:(NSString *)password email:(NSString *)email;
 
 - (BOOL)signUp:(NSError **)error;
-- (BOOL)signIn:(NSError **)error;
-- (BOOL)signOut:(NSError **)error;
-- (BOOL)requestPasswordResetEmail:(NSError **)error;
-
-+ (id)new UNAVAILABLE_ATTRIBUTE;
-- (id)init UNAVAILABLE_ATTRIBUTE;
+- (BOOL)signIn:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
+- (BOOL)signOut:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
+- (BOOL)requestPasswordResetEmail:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
 @end

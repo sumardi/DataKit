@@ -62,6 +62,7 @@ var _createRoutes = function (path) {
   };
   app.get(m(), _m('info'));
   app.get(m('public/:key'), _m('getPublishedObject'));
+  app.post(m('signUp'), _secureMethod('signUp'));
   app.post(m('publish'), _secureMethod('publishObject'));
   app.post(m('save'), _secureMethod('saveObject'));
   app.post(m('delete'), _secureMethod('deleteObject'));
@@ -114,6 +115,9 @@ var _DKDB = {
   SEQENCE: 'datakit.seq',
   USERS: 'datakit.users'
 };
+var _DKUSER_FNAME = 'name';
+var _DKUSER_FPASSWD = 'passwd';
+var _DKUSER_FEMAIL = 'email';
 var _ERR = {
   INVALID_PARAMS: [100, 'Invalid parameters'],
   OPERATION_FAILED: [101, 'Operation failed'],
@@ -311,6 +315,60 @@ exports.getPublishedObject = function (req, res) {
     }
 
     return res.send(404);
+  });
+};
+exports.signUp = function (req, res) {
+  doSync(function signUpSync() {
+    var uname, upasswd, uemail, opts, collection, cursor, query, count, userDoc, doc;
+    uname = req.param('name', null);
+    upasswd = req.param('passwd', null);
+    uemail = req.param('email', null);
+    if (!uname || !upasswd || !uemail || uname.length < 4) {
+      return _e(res, _ERR.INVALID_PARAMS);
+    }
+
+    // Check if user with the given name or email doesn't exist yet
+    opts = {
+      'safe': true,
+      'unique': true,
+      'dropDups': false
+    };
+    collection = _db.collection.sync(_db, _DKDB.USERS);
+
+    try {
+      query = {
+        $or: [
+          {_DKUSER_FNAME: uname},
+          {_DKUSER_FEMAIL: uemail}
+        ]
+      };
+      cursor = collection.find.sync(collection, query);
+      count = cursor.count.sync(cursor);
+
+      if (count !== 0) {
+        return _e(res, _ERR.DUPLICATE_KEY);
+      }
+    } catch (e) {
+      return _e(res, _ERR.OPERATION_FAILED);
+    }
+
+    try {
+      userDoc = {
+        _DKUSER_FNAME: uname,
+        _DKUSER_FEMAIL: uemail,
+        _DKUSER_FPASSWD: upasswd
+      };
+      doc = collection.insert.sync(collection, userDoc);
+
+      console.log("signed up:", uname);
+      // TODO: send activation email ??
+
+      return res.send('', 200);
+    } catch (e2) {
+      console.error(e2);
+    }
+
+    return _e(res, _ERR.OPERATION_FAILED);
   });
 };
 exports.publishObject = function (req, res) {

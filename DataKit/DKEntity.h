@@ -391,7 +391,4 @@
  */
 + (BOOL)destroyAllEntitiesForName:(NSString *)entityName error:(NSError **)error;
 
-+ (id)new UNAVAILABLE_ATTRIBUTE;
-- (id)init UNAVAILABLE_ATTRIBUTE;
-
 @end

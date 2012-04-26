@@ -560,7 +560,7 @@
   
   // Test contains string (simple regex)
   DKQuery *q6 = [DKQuery queryWithEntityName:entityName];
-  [q6 whereKey:@"a" containsString:@"newline\nin"];
+  [q6 whereKey:@"a" containsString:@"newline\nin" caseInsensitive:NO];
   
   error = nil;
   results = [q6 findAll:&error];
