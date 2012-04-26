@@ -111,7 +111,8 @@ var _c = {
 };
 var _DKDB = {
   PUBLIC_OBJECTS: 'datakit.pub',
-  SEQENCE: 'datakit.seq'
+  SEQENCE: 'datakit.seq',
+  USERS: 'datakit.users'
 };
 var _ERR = {
   INVALID_PARAMS: [100, 'Invalid parameters'],
