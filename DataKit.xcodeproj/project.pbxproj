@@ -60,7 +60,7 @@
 		DC8305201505127B00D6AB1C /* DKQueryTableViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = DC83051E1505127B00D6AB1C /* DKQueryTableViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC8305211505127B00D6AB1C /* DKQueryTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DC83051F1505127B00D6AB1C /* DKQueryTableViewController.m */; };
 		DC830523150513A200D6AB1C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC830522150513A200D6AB1C /* UIKit.framework */; };
-		DC8C008F154887E4003838A7 /* DKUser.h in Headers */ = {isa = PBXBuildFile; fileRef = DC8C008D154887E4003838A7 /* DKUser.h */; };
+		DC8C008F154887E4003838A7 /* DKUser.h in Headers */ = {isa = PBXBuildFile; fileRef = DC8C008D154887E4003838A7 /* DKUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC8C0090154887E4003838A7 /* DKUser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC8C008E154887E4003838A7 /* DKUser.m */; };
 		DC90FF9014FE4F9300F52435 /* DKQuery-Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DC90FF8E14FE4F9200F52435 /* DKQuery-Private.h */; };
 		DC90FF9414FE872700F52435 /* DKQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90FF9314FE872700F52435 /* DKQueryTests.m */; };

@@ -12,6 +12,7 @@
 #import "DKQuery.h"
 #import "DKMapReduce.h"
 #import "DKFile.h"
+#import "DKUser.h"
 #import "DKConstants.h"
 #import "DKQueryTableViewController.h"
 #import "DKNetworkActivity.h"
