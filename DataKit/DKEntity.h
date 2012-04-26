@@ -326,7 +326,7 @@
  Indexes often improve query perfomance dramatically.
  @param key The key to index
  */
-- (BOOL)ensureIndexForKey:(NSString *)key;
+- (BOOL)ensureIndexForKey:(NSString *)key DEPRECATED_ATTRIBUTE;
 
 /**
  Ensures that the given `key` is indexed with options
@@ -337,7 +337,7 @@
  @param dropDups Automatically drop any duplicates
  @param error The error object to be set on error
  */
-- (BOOL)ensureIndexForKey:(NSString *)key unique:(BOOL)unique dropDuplicates:(BOOL)dropDups error:(NSError **)error;
+- (BOOL)ensureIndexForKey:(NSString *)key unique:(BOOL)unique dropDuplicates:(BOOL)dropDups error:(NSError **)error DEPRECATED_ATTRIBUTE;
 
 /** @name Make Relations */
 
