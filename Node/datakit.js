@@ -319,7 +319,7 @@ exports.getPublishedObject = function (req, res) {
 };
 exports.signUp = function (req, res) {
   doSync(function signUpSync() {
-    var uname, upasswd, uemail, opts, collection, cursor, query, count, userDoc, doc;
+    var uname, upasswd, uemail, collection, cursor, query, count, userDoc, doc;
     uname = req.param('name', null);
     upasswd = req.param('passwd', null);
     uemail = req.param('email', null);
@@ -328,14 +328,8 @@ exports.signUp = function (req, res) {
     }
 
     // Check if user with the given name or email doesn't exist yet
-    opts = {
-      'safe': true,
-      'unique': true,
-      'dropDups': false
-    };
-    collection = _db.collection.sync(_db, _DKDB.USERS);
-
     try {
+      collection = _db.collection.sync(_db, _DKDB.USERS);
       query = {
         $or: [
           {_DKUSER_FNAME: uname},
