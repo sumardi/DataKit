@@ -60,6 +60,8 @@
 		DC8305201505127B00D6AB1C /* DKQueryTableViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = DC83051E1505127B00D6AB1C /* DKQueryTableViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC8305211505127B00D6AB1C /* DKQueryTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DC83051F1505127B00D6AB1C /* DKQueryTableViewController.m */; };
 		DC830523150513A200D6AB1C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC830522150513A200D6AB1C /* UIKit.framework */; };
+		DC8C008F154887E4003838A7 /* DKUser.h in Headers */ = {isa = PBXBuildFile; fileRef = DC8C008D154887E4003838A7 /* DKUser.h */; };
+		DC8C0090154887E4003838A7 /* DKUser.m in Sources */ = {isa = PBXBuildFile; fileRef = DC8C008E154887E4003838A7 /* DKUser.m */; };
 		DC90FF9014FE4F9300F52435 /* DKQuery-Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DC90FF8E14FE4F9200F52435 /* DKQuery-Private.h */; };
 		DC90FF9414FE872700F52435 /* DKQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC90FF9314FE872700F52435 /* DKQueryTests.m */; };
 		DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */ = {isa = PBXBuildFile; fileRef = DC957A2A1541A746008683DB /* NSURLConnection+Timeout.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -132,6 +134,8 @@
 		DC83051E1505127B00D6AB1C /* DKQueryTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKQueryTableViewController.h; sourceTree = "<group>"; };
 		DC83051F1505127B00D6AB1C /* DKQueryTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKQueryTableViewController.m; sourceTree = "<group>"; };
 		DC830522150513A200D6AB1C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		DC8C008D154887E4003838A7 /* DKUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKUser.h; sourceTree = "<group>"; };
+		DC8C008E154887E4003838A7 /* DKUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKUser.m; sourceTree = "<group>"; };
 		DC90FF8E14FE4F9200F52435 /* DKQuery-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DKQuery-Private.h"; sourceTree = "<group>"; };
 		DC90FF9214FE872700F52435 /* DKQueryTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKQueryTests.h; sourceTree = "<group>"; };
 		DC90FF9314FE872700F52435 /* DKQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKQueryTests.m; sourceTree = "<group>"; };
@@ -220,6 +224,8 @@
 				DC275A76150FD58200FE7BD4 /* DKFile.m */,
 				DC80DAC41534293700A6857A /* DKNetworkActivity.h */,
 				DC80DAC51534293700A6857A /* DKNetworkActivity.m */,
+				DC8C008D154887E4003838A7 /* DKUser.h */,
+				DC8C008E154887E4003838A7 /* DKUser.m */,
 			);
 			path = DataKit;
 			sourceTree = "<group>";
@@ -297,6 +303,7 @@
 				DC275A77150FD58200FE7BD4 /* DKFile.h in Headers */,
 				DC80DAC61534293700A6857A /* DKNetworkActivity.h in Headers */,
 				DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */,
+				DC8C008F154887E4003838A7 /* DKUser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -440,6 +447,7 @@
 				DC275A78150FD58200FE7BD4 /* DKFile.m in Sources */,
 				DC80DAC71534293700A6857A /* DKNetworkActivity.m in Sources */,
 				DC957A2D1541A746008683DB /* NSURLConnection+Timeout.m in Sources */,
+				DC8C0090154887E4003838A7 /* DKUser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
