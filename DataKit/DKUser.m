@@ -55,16 +55,27 @@
 
 - (BOOL)signUp:(NSError **)error {
   if (self.name.length == 0) {
-    [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Username invalid", nil)];
+    if (error != NULL) {
+      NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Username invalid", nil) forKey:NSLocalizedDescriptionKey];
+      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:userInfo];
+    }
+
     return NO;
   }
   if (self.email.length == 0) {
-    // TODO: validate using regex
-    [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Email invalid", nil)];
+    if (error != NULL) {
+      NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Email invalid", nil) forKey:NSLocalizedDescriptionKey];
+      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x101 userInfo:userInfo];
+    }
+    
     return NO;
   }
   if (self.password.length == 0) {
-    [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Password invalid", nil)];
+    if (error != NULL) {
+      NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Password invalid", nil) forKey:NSLocalizedDescriptionKey];
+      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x102 userInfo:userInfo];
+    }
+    
     return NO;
   }
   
