@@ -30,7 +30,7 @@ DKSynthesize(userInfo)
 #define kDKEntityIDField @"_id"
 #define kDKEntityUpdatedField @"_updated"
 
-+ (DKEntity *)entityWithName:(NSString *)entityName {
++ (instancetype)entityWithName:(NSString *)entityName {
   return [[self alloc] initWithName:entityName];
 }
 

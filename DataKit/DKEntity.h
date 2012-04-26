@@ -69,7 +69,7 @@
  @param entityName The entity name
  @return The initialized entity
  */
-+ (DKEntity *)entityWithName:(NSString *)entityName;
++ (instancetype)entityWithName:(NSString *)entityName;
 
 /**
  Initialize a new entity
