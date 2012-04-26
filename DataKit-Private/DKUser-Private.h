@@ -9,5 +9,8 @@
 #import "DKUser.h"
 
 @interface DKUser ()
+@property (nonatomic, copy) NSString *sessionToken;
+
+- (BOOL)userNameAndPasswordValid:(NSError **)error;
 
 @end

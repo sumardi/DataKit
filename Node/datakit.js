@@ -63,6 +63,7 @@ var _createRoutes = function (path) {
   app.get(m(), _m('info'));
   app.get(m('public/:key'), _m('getPublishedObject'));
   app.post(m('signUp'), _secureMethod('signUp'));
+  app.post(m('signIn'), _secureMethod('signIn'));
   app.post(m('publish'), _secureMethod('publishObject'));
   app.post(m('save'), _secureMethod('saveObject'));
   app.post(m('delete'), _secureMethod('deleteObject'));
@@ -329,6 +330,7 @@ exports.signUp = function (req, res) {
 
     // Check if user with the given name or email doesn't exist yet
     try {
+      // TODO: hash pw!
       collection = _db.collection.sync(_db, _DKDB.USERS);
       query = {
         $or: [
@@ -354,12 +356,57 @@ exports.signUp = function (req, res) {
       };
       doc = collection.insert.sync(collection, userDoc);
 
+      // TODO:
+      // - remove log
+      // - send activation email ??
       console.log("signed up:", uname);
-      // TODO: send activation email ??
 
       return res.send('', 200);
     } catch (e2) {
       console.error(e2);
+    }
+
+    return _e(res, _ERR.OPERATION_FAILED);
+  });
+};
+exports.signIn = function (req, res) {
+  doSync(function signInSync() {
+    var uname, upasswd, signature, shasum, sessionId, col, query, doc;
+    uname = req.param('name', null);
+    upasswd = req.param('passwd', null);
+    if (!uname || !upasswd) {
+      return _e(res, _ERR.INVALID_PARAMS);
+    }
+
+    try {
+      // Create new session ID
+      signature = uuid.v4() + uname;
+      shasum = crypto.createHash('sha1');
+      shasum.update(signature);
+      sessionId = shasum.digest('hex');
+
+      // Update session if user is found
+      // TODO: hash pw!
+      col = _db.collection.sync(_db, _DKDB.USERS);
+      query = {
+        _DKUSER_FNAME: uname,
+        _DKUSER_FPASSWD: upasswd
+      };
+
+      doc = col.findAndModify.sync(
+        col,
+        query,
+        [],
+        {'$set': {'sid': sessionId}},
+        {'safe': true, 'new': true}
+      );
+      if (doc) {
+        // TODO: remove log
+        console.log("signed in:", uname, "sid =>", doc.sid);
+        return res.json(doc.sid, 200);
+      }
+    } catch (e) {
+      console.error(e);
     }
 
     return _e(res, _ERR.OPERATION_FAILED);

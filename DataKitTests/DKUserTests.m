@@ -90,4 +90,49 @@
   }
 }
 
+- (void)testSignIn {
+  // Drop old users
+  NSError *dropError = nil;
+  BOOL dropped = [DKManager dropDatabase:@"datakit.users" error:&dropError];
+  
+  STAssertTrue(dropped, nil);
+  STAssertNil(dropError, dropError.localizedDescription);
+  
+  // Create test user
+  NSString *uname = @"erik";
+  NSString *upasswd = @"mypasswd";
+  NSString *uemail = @"ax76s88sc8s@fakemail.xy";
+  
+  DKUser *user = [DKUser userWithName:uname password:upasswd email:uemail];
+  
+  NSError *error = nil;
+  BOOL success = [user signUp:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  // Sign in with wrong credentials
+  user = [DKUser userWithName:uname password:@"wrongpassword" email:nil];
+  
+  error = nil;
+  success = [user signIn:&error];
+  
+  STAssertFalse(success, nil);
+  STAssertNotNil(error, nil);
+  STAssertFalse(user.isSignedIn, nil);
+  if (error != nil) {
+    NSLog(@"got error as expected: %@", error.localizedDescription);
+  }
+
+  // Sign in with correct credentials
+  user = [DKUser userWithName:uname password:upasswd email:nil];
+  
+  error = nil;
+  success = [user signIn:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  STAssertTrue(user.isSignedIn, nil);
+}
+
 @end

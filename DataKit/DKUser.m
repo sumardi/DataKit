@@ -14,6 +14,7 @@
 #import "NSData+DataKit.h"
 
 @implementation DKUser
+DKSynthesize(sessionToken)
 
 #define kDKUserEntityName @"datakit.users"
 #define kDKUserNameField @"name"
@@ -24,7 +25,9 @@
   DKUser *user = [self entityWithName:kDKUserEntityName];
   user.name = name;
   user.password = password;
-  user.email = email;
+  if (email.length > 0) {
+    user.email = email;
+  }
 
   return user;
 }
@@ -53,19 +56,15 @@
   [self setObject:[password copy] forKey:kDKUserPasswdField];
 }
 
-- (BOOL)signUp:(NSError **)error {
+- (BOOL)isSignedIn {
+  return (self.sessionToken.length > 0);
+}
+
+- (BOOL)userNameAndPasswordValid:(NSError **)error {
   if (self.name.length == 0) {
     if (error != NULL) {
       NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Username invalid", nil) forKey:NSLocalizedDescriptionKey];
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:userInfo];
-    }
-
-    return NO;
-  }
-  if (self.email.length == 0) {
-    if (error != NULL) {
-      NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Email invalid", nil) forKey:NSLocalizedDescriptionKey];
-      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x101 userInfo:userInfo];
     }
     
     return NO;
@@ -79,6 +78,23 @@
     return NO;
   }
   
+  return YES;
+}
+
+- (BOOL)signUp:(NSError **)error {
+  if (![self userNameAndPasswordValid:error]) {
+    return NO;
+  }
+  if (self.email.length == 0) {
+    if (error != NULL) {
+      NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Email invalid", nil) forKey:NSLocalizedDescriptionKey];
+      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x101 userInfo:userInfo];
+    }
+    
+    return NO;
+  }
+  
+  // Request params
   NSDictionary *requestObjects = [NSDictionary dictionaryWithObjectsAndKeys:
                                   self.name, @"name",
                                   self.email, @"email",
@@ -91,6 +107,32 @@
   NSError *requestError = nil;
   [request sendRequestWithObject:requestObjects method:@"signUp" error:&requestError];
   if (requestError != nil) {
+    if (error != nil) {
+      *error = requestError;
+    }
+    return NO;
+  }
+  
+  return YES;
+}
+
+- (BOOL)signIn:(NSError **)error {
+  if (![self userNameAndPasswordValid:error]) {
+    return NO;
+  }
+  
+  // Request params
+  NSDictionary *requestObjects = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  self.name, @"name",
+                                  self.password, @"passwd", nil];
+  
+  // Send request synchronously
+  DKRequest *request = [DKRequest request];
+  request.cachePolicy = DKCachePolicyIgnoreCache;
+  
+  NSError *requestError = nil;
+  self.sessionToken = [request sendRequestWithObject:requestObjects method:@"signIn" error:&requestError];
+  if (requestError != nil || self.sessionToken.length == 0) {
     if (error != nil) {
       *error = requestError;
     }

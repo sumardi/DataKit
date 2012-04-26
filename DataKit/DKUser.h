@@ -21,7 +21,7 @@
 + (instancetype)userWithName:(NSString *)name password:(NSString *)password email:(NSString *)email;
 
 - (BOOL)signUp:(NSError **)error;
-- (BOOL)signIn:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
+- (BOOL)signIn:(NSError **)error;
 - (BOOL)signOut:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 - (BOOL)requestPasswordResetEmail:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
