@@ -53,11 +53,21 @@
   [self setObject:[password copy] forKey:kDKUserPasswdField];
 }
 
-- (void)setPasswordHashed:(NSString *)passwordToHash {
-  [self setPassword:[[passwordToHash dataUsingEncoding:NSUTF8StringEncoding] SHA1]];
-}
-
 - (BOOL)signUp:(NSError **)error {
+  if (self.name.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Username invalid", nil)];
+    return NO;
+  }
+  if (self.email.length == 0) {
+    // TODO: validate using regex
+    [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Email invalid", nil)];
+    return NO;
+  }
+  if (self.password.length == 0) {
+    [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Password invalid", nil)];
+    return NO;
+  }
+  
   NSDictionary *requestObjects = [NSDictionary dictionaryWithObjectsAndKeys:
                                   self.name, @"name",
                                   self.email, @"email",

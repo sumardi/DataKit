@@ -323,7 +323,7 @@ exports.signUp = function (req, res) {
     uname = req.param('name', null);
     upasswd = req.param('passwd', null);
     uemail = req.param('email', null);
-    if (!uname || !upasswd || !uemail || uname.length < 4) {
+    if (!uname || !upasswd || !uemail || uname.length < 4 || upasswd.length < 8) {
       return _e(res, _ERR.INVALID_PARAMS);
     }
 

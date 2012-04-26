@@ -25,6 +25,4 @@
 - (BOOL)signOut:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 - (BOOL)requestPasswordResetEmail:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
-- (void)setPasswordHashed:(NSString *)passwordToHash;
-
 @end

@@ -53,8 +53,8 @@
   NSTimeInterval updatedAt = object.updatedAt.timeIntervalSince1970;
   NSTimeInterval createdNow = [[NSDate date] timeIntervalSince1970];
   
-  STAssertEqualsWithAccuracy(createdAt, createdNow, 1.0, nil);
-  STAssertEqualsWithAccuracy(updatedAt, createdNow, 1.0, nil);
+  STAssertEqualsWithAccuracy(createdAt, createdNow, 2.0, nil);
+  STAssertEqualsWithAccuracy(updatedAt, createdNow, 2.0, nil);
   
   // Update
   [object setObject:@"Stefan" forKey:@"name"];
