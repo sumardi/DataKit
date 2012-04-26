@@ -10,19 +10,51 @@
 
 #import "DKRequest.h"
 #import "DKUser-Private.h"
+#import "DKEntity-Private.h"
+#import "NSData+DataKit.h"
 
 @implementation DKUser
-DKSynthesize(name)
-DKSynthesize(email)
-DKSynthesize(password)
+
+#define kDKUserEntityName @"datakit.users"
+#define kDKUserNameField @"name"
+#define kDKUserEmailField @"email"
+#define kDKUserPasswdField @"passwd"
 
 + (instancetype)userWithName:(NSString *)name password:(NSString *)password email:(NSString *)email {
-  DKUser *user = [DKUser new];
+  DKUser *user = [self entityWithName:kDKUserEntityName];
   user.name = name;
   user.password = password;
   user.email = email;
 
   return user;
+}
+
+- (NSString *)name {
+  return [[self objectForKey:kDKUserNameField] copy];
+}
+
+- (void)setName:(NSString *)name {
+  [self setObject:[name copy] forKey:kDKUserNameField];
+}
+
+- (NSString *)email {
+  return [[self objectForKey:kDKUserEmailField] copy];
+}
+
+- (void)setEmail:(NSString *)email {
+  [self setObject:[email copy] forKey:kDKUserEmailField];
+}
+
+- (NSString *)password {
+  return [[self objectForKey:kDKUserPasswdField] copy];
+}
+
+- (void)setPassword:(NSString *)password {
+  [self setObject:[password copy] forKey:kDKUserPasswdField];
+}
+
+- (void)setPasswordHashed:(NSString *)passwordToHash {
+  [self setPassword:[[passwordToHash dataUsingEncoding:NSUTF8StringEncoding] SHA1]];
 }
 
 - (BOOL)signUp:(NSError **)error {

@@ -22,6 +22,12 @@
 
 @end
 
+@interface NSData (Hash)
+
+- (NSString *)SHA1;
+
+@end
+
 @interface NSData (AES256)
 
 - (NSData *)AES256EncryptWithKey:(NSData *)key UNAVAILABLE_ATTRIBUTE;

@@ -13,9 +13,9 @@
 @interface DKUser : DKEntity
 @property (nonatomic, readonly) BOOL isSignedIn UNIMPLEMENTED_ATTRIBUTE;
 @property (nonatomic, readonly) BOOL isNew UNIMPLEMENTED_ATTRIBUTE;
-@property (nonatomic, copy, readonly) NSString *name;
-@property (nonatomic, copy, readonly) NSString *password;
-@property (nonatomic, copy, readonly) NSString *email;
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSString *password;
+@property (nonatomic, copy) NSString *email;
 
 + (instancetype)lastAuthenticatedUser UNIMPLEMENTED_ATTRIBUTE;
 + (instancetype)userWithName:(NSString *)name password:(NSString *)password email:(NSString *)email;
@@ -24,5 +24,7 @@
 - (BOOL)signIn:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 - (BOOL)signOut:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 - (BOOL)requestPasswordResetEmail:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
+
+- (void)setPasswordHashed:(NSString *)passwordToHash;
 
 @end

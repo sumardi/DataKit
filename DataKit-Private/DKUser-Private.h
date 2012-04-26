@@ -9,7 +9,5 @@
 #import "DKUser.h"
 
 @interface DKUser ()
-@property (nonatomic, copy, readwrite) NSString *name;
-@property (nonatomic, copy, readwrite) NSString *password;
-@property (nonatomic, copy, readwrite) NSString *email;
+
 @end
