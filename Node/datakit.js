@@ -116,9 +116,6 @@ var _DKDB = {
   SEQENCE: 'datakit.seq',
   USERS: 'datakit.users'
 };
-var _DKUSER_FNAME = 'name';
-var _DKUSER_FPASSWD = 'passwd';
-var _DKUSER_FEMAIL = 'email';
 var _ERR = {
   INVALID_PARAMS: [100, 'Invalid parameters'],
   OPERATION_FAILED: [101, 'Operation failed'],
@@ -338,8 +335,8 @@ exports.signUp = function (req, res) {
       collection = _db.collection.sync(_db, _DKDB.USERS);
       query = {
         $or: [
-          {_DKUSER_FNAME: uname},
-          {_DKUSER_FEMAIL: uemail}
+          {'name': uname},
+          {'email': uemail}
         ]
       };
       cursor = collection.find.sync(collection, query);
@@ -354,9 +351,9 @@ exports.signUp = function (req, res) {
 
     try {
       userDoc = {
-        _DKUSER_FNAME: uname,
-        _DKUSER_FEMAIL: uemail,
-        _DKUSER_FPASSWD: _hash('sha1', upasswd)
+        'name': uname,
+        'email': uemail,
+        'passwd': _hash('sha1', upasswd)
       };
       doc = collection.insert.sync(collection, userDoc);
 
@@ -389,8 +386,8 @@ exports.signIn = function (req, res) {
       // Update session if user is found
       col = _db.collection.sync(_db, _DKDB.USERS);
       query = {
-        _DKUSER_FNAME: uname,
-        _DKUSER_FPASSWD: _hash('sha1', upasswd)
+        'name': uname,
+        'passwd': _hash('sha1', upasswd)
       };
 
       doc = col.findAndModify.sync(
