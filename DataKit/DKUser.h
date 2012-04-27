@@ -11,17 +11,16 @@
 #define UNIMPLEMENTED_ATTRIBUTE
 
 @interface DKUser : DKEntity
-@property (nonatomic, readonly) BOOL isSignedIn UNIMPLEMENTED_ATTRIBUTE;
 @property (nonatomic, readonly) BOOL isNew UNIMPLEMENTED_ATTRIBUTE;
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy) NSString *password;
 @property (nonatomic, copy) NSString *email;
 
-+ (instancetype)lastAuthenticatedUser UNIMPLEMENTED_ATTRIBUTE;
-+ (instancetype)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
-+ (instancetype)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
-+ (BOOL)requestPasswordResetForUsername:(NSString *)name orEmail:(NSString *)email error:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
++ (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
++ (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
++ (instancetype)currentUser UNIMPLEMENTED_ATTRIBUTE;
++ (void)signOut UNIMPLEMENTED_ATTRIBUTE;
 
-- (BOOL)signOut:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
++ (BOOL)requestPasswordResetForUsername:(NSString *)name orEmail:(NSString *)email error:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
 @end

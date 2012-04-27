@@ -21,14 +21,14 @@ DKSynthesize(sessionToken)
 #define kDKUserEmailField @"email"
 #define kDKUserPasswdField @"passwd"
 
-+ (instancetype)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error {
++ (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error {
   if (name.length == 0) {
     if (error != NULL) {
       NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Username invalid", nil) forKey:NSLocalizedDescriptionKey];
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:userInfo];
     }
     
-    return nil;
+    return NO;
   }
   if (password.length == 0) {
     if (error != NULL) {
@@ -36,7 +36,7 @@ DKSynthesize(sessionToken)
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x102 userInfo:userInfo];
     }
     
-    return nil;
+    return NO;
   }
   if (email.length == 0) {
     if (error != NULL) {
@@ -44,7 +44,7 @@ DKSynthesize(sessionToken)
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x101 userInfo:userInfo];
     }
     
-    return nil;
+    return NO;
   }
   
   // Request params
@@ -63,26 +63,20 @@ DKSynthesize(sessionToken)
     if (error != nil) {
       *error = requestError;
     }
-    return nil;
+    return NO;
   }
   
-  // Create user and return
-  DKUser *user = [DKUser entityWithName:kDKUserEntityName];
-  user.name = name;
-  user.email = email;
-  user.password = password;
-  
-  return user;
+return YES;
 }
 
-+ (instancetype)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error {
++ (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error {
   if (name.length == 0) {
     if (error != NULL) {
       NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Username invalid", nil) forKey:NSLocalizedDescriptionKey];
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:userInfo];
     }
     
-    return nil;
+    return NO;
   }
   if (password.length == 0) {
     if (error != NULL) {
@@ -90,7 +84,7 @@ DKSynthesize(sessionToken)
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x102 userInfo:userInfo];
     }
     
-    return nil;
+    return NO;
   }
   
   // Request params
@@ -108,16 +102,10 @@ DKSynthesize(sessionToken)
     if (error != nil) {
       *error = requestError;
     }
-    return nil;
+    return NO;
   }
   
-  // Create user and return
-  DKUser *user = [DKUser entityWithName:kDKUserEntityName];
-  user.name = name;
-  user.password = password;
-  user.sessionToken = sessionToken;
-  
-  return user;
+  return YES;
 }
 
 - (NSString *)name {
@@ -142,10 +130,6 @@ DKSynthesize(sessionToken)
 
 - (void)setPassword:(NSString *)password {
   [self setObject:[password copy] forKey:kDKUserPasswdField];
-}
-
-- (BOOL)isSignedIn {
-  return (self.sessionToken.length > 0);
 }
 
 @end
