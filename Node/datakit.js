@@ -125,6 +125,11 @@ var _ERR = {
   OPERATION_NOT_ALLOWED: [102, 'Operation not allowed'],
   DUPLICATE_KEY: [103, 'Duplicate key']
 };
+var _hash = function (a, s) {
+  var h = crypto.createHash(a);
+  h.update(s);
+  return h.digest('hex');
+};
 var _copyKeys = function (s, t) {
   var key;
   for (key in s) {
@@ -371,7 +376,7 @@ exports.signUp = function (req, res) {
 };
 exports.signIn = function (req, res) {
   doSync(function signInSync() {
-    var uname, upasswd, signature, shasum, sessionId, col, query, doc;
+    var uname, upasswd, signature, sessionId, col, query, doc;
     uname = req.param('name', null);
     upasswd = req.param('passwd', null);
     if (!uname || !upasswd) {
@@ -380,10 +385,7 @@ exports.signIn = function (req, res) {
 
     try {
       // Create new session ID
-      signature = uuid.v4() + uname;
-      shasum = crypto.createHash('sha1');
-      shasum.update(signature);
-      sessionId = shasum.digest('hex');
+      sessionId = _hash('sha1', uuid.v4() + uname);
 
       // Update session if user is found
       // TODO: hash pw!
@@ -414,7 +416,7 @@ exports.signIn = function (req, res) {
 };
 exports.publishObject = function (req, res) {
   doSync(function publishObjectSync() {
-    var entity, fn, isFile, oid, q, fields, query, idf, signature, shasum, key, col;
+    var entity, fn, isFile, oid, q, fields, query, idf, key, col;
     entity = req.param('entity', null);
     oid = req.param('oid', null);
     fn = req.param('fileName', null);
@@ -439,10 +441,7 @@ exports.publishObject = function (req, res) {
     }
 
     // Compute key
-    signature = _conf.secret + _conf.salt + idf;
-    shasum = crypto.createHash('sha256');
-    shasum.update(signature);
-    key = shasum.digest('hex');
+    key = _hash('sha256', _conf.secret + _conf.salt + idf);
 
     try {
       q = isFile ? fn : query;
