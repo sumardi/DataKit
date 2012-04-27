@@ -111,6 +111,13 @@ var _c = {
   purple: '\u001b[34m',
   reset: '\u001b[0m'
 };
+var _DKSPLASH = "\
+ _____     ______     ______   ______     __  __     __     ______\n\
+/\\  __-.  /\\  __ \\   /\\__  _\\ /\\  __ \\   /\\ \\/ /    /\\ \\   /\\__  _\\\n\
+\\ \\ \\/\\ \\ \\ \\  __ \\  \\/_/\\ \\/ \\ \\  __ \\  \\ \\  _\"-.  \\ \\ \\  \\/_/\\ \\/\n\
+ \\ \\____-  \\ \\_\\ \\_\\    \\ \\_\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\  \\ \\_\\    \\ \\_\\\n\
+  \\/____/   \\/_/\\/_/     \\/_/   \\/_/\\/_/   \\/_/\\/_/   \\/_/     \\/_/\n\
+";
 var _DKDB = {
   PUBLIC_OBJECTS: 'datakit.pub',
   SEQENCE: 'datakit.seq',
@@ -225,7 +232,7 @@ exports.run = function (c) {
     var pad, nl, buf, srv, db, parse;
     pad = '-'.repeat(80);
     nl = '\n';
-    console.log(nl + pad + nl + 'DATAKIT' + nl + pad);
+    console.log(nl + pad + nl + _DKSPLASH + nl + pad);
     _conf.mongoURI = _safe(c.mongoURI, 'mongodb://localhost:27017/datakit');
     _conf.path = _safe(c.path, '');
     _conf.port = _safe(c.port, process.env.PORT || 3000);
@@ -267,7 +274,7 @@ exports.run = function (c) {
       process.exit(2);
     }
 
-    console.log('CONF:', JSON.stringify(_conf, undefined, 2), nl);
+    console.log(JSON.stringify(_conf, undefined, 2), nl);
 
     // Create API routes
     _createRoutes(_conf.path);
