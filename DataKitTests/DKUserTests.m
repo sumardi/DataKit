@@ -31,12 +31,10 @@
   NSString *upasswd = @"mypasswd";
   NSString *uemail = @"ax76s88sc8s@fakemail.xy";
   
-  DKUser *user = [DKUser userWithName:uname password:upasswd email:uemail];
-  
   NSError *error = nil;
-  BOOL success = [user signUp:&error];
+  DKUser *user = [DKUser signUpUserWithName:uname password:upasswd email:uemail error:&error];
   
-  STAssertFalse(success, nil);
+  STAssertNil(user, nil);
   STAssertNotNil(error, nil);
   STAssertEquals(error.code, (NSInteger)100, @"code: %i", error.code);
   if (error != nil) {
@@ -45,19 +43,20 @@
   
   // Check if signup works
   uname = @"erik";
-  user = [DKUser userWithName:uname password:upasswd email:uemail];
-  
   error = nil;
-  success = [user signUp:&error];
+  user = [DKUser signUpUserWithName:uname password:upasswd email:uemail error:&error];
   
-  STAssertTrue(success, nil);
+  STAssertNotNil(user, nil);
+  STAssertEqualObjects(user.email, uemail, nil);
+  STAssertEqualObjects(user.password, upasswd, nil);
+  STAssertEqualObjects(user.name, uname, nil);
   STAssertNil(error, error.localizedDescription);
   
   // Check if signup with dupe email and name returns error correctly
   error = nil;
-  success = [user signUp:&error];
+  user = [DKUser signUpUserWithName:uname password:upasswd email:uemail error:&error];
   
-  STAssertFalse(success, nil);
+  STAssertNil(user, nil);
   STAssertNotNil(error, nil);
   STAssertEquals(error.code, (NSInteger)103, @"code: %i", error.code);
   if (error != nil) {
@@ -65,25 +64,22 @@
   }
   
   // Check if signup with dupe email returns error correctly
-  uname = @"erik2";
-  user = [DKUser userWithName:uname password:upasswd email:uemail];
-  
+  uname = @"erik2";  
   error = nil;
-  success = [user signUp:&error];
+  user = [DKUser signUpUserWithName:uname password:upasswd email:uemail error:&error];
   
-  STAssertFalse(success, nil);
+  STAssertNil(user, nil);
   STAssertNotNil(error, error.localizedDescription);
   STAssertEquals(error.code, (NSInteger)103, @"code: %i", error.code);
   
   // Check if signup with dupe name returns error correctly
   uname = @"erik";
   uemail = @"bx76s88sc8s@fakemail.xy";
-  user = [DKUser userWithName:uname password:upasswd email:uemail];
   
   error = nil;
-  success = [user signUp:&error];
+  user = [DKUser signUpUserWithName:uname password:upasswd email:uemail error:&error];
   
-  STAssertFalse(success, nil);
+  STAssertNil(user, nil);
   STAssertNotNil(error, nil);
   if (error != nil) {
     NSLog(@"got error as expected: %@", error.localizedDescription);
@@ -101,23 +97,18 @@
   // Create test user
   NSString *uname = @"erik";
   NSString *upasswd = @"mypasswd";
-  NSString *uemail = @"ax76s88sc8s@fakemail.xy";
-  
-  DKUser *user = [DKUser userWithName:uname password:upasswd email:uemail];
   
   NSError *error = nil;
-  BOOL success = [user signUp:&error];
+  DKUser *user = [DKUser signUpUserWithName:uname password:upasswd email:@"test@email.xyz" error:&error];
   
-  STAssertTrue(success, nil);
+  STAssertNotNil(user, nil);
   STAssertNil(error, error.localizedDescription);
   
   // Sign in with wrong credentials
-  user = [DKUser userWithName:uname password:@"wrongpassword" email:nil];
-  
   error = nil;
-  success = [user signIn:&error];
+  user = [DKUser signInUserWithName:uname password:@"wrongpassword" error:&error];
   
-  STAssertFalse(success, nil);
+  STAssertNil(user, nil);
   STAssertNotNil(error, nil);
   STAssertFalse(user.isSignedIn, nil);
   if (error != nil) {
@@ -125,12 +116,10 @@
   }
 
   // Sign in with correct credentials
-  user = [DKUser userWithName:uname password:upasswd email:nil];
-  
   error = nil;
-  success = [user signIn:&error];
+  user = [DKUser signInUserWithName:uname password:upasswd error:&error];
   
-  STAssertTrue(success, nil);
+  STAssertNotNil(user, nil);
   STAssertNil(error, error.localizedDescription);
   STAssertTrue(user.isSignedIn, nil);
 }

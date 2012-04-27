@@ -18,11 +18,10 @@
 @property (nonatomic, copy) NSString *email;
 
 + (instancetype)lastAuthenticatedUser UNIMPLEMENTED_ATTRIBUTE;
-+ (instancetype)userWithName:(NSString *)name password:(NSString *)password email:(NSString *)email;
++ (instancetype)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
++ (instancetype)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
++ (BOOL)requestPasswordResetForUsername:(NSString *)name orEmail:(NSString *)email error:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
-- (BOOL)signUp:(NSError **)error;
-- (BOOL)signIn:(NSError **)error;
 - (BOOL)signOut:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
-- (BOOL)requestPasswordResetEmail:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
 @end

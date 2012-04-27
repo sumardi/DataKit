@@ -11,6 +11,6 @@
 @interface DKUser ()
 @property (nonatomic, copy) NSString *sessionToken;
 
-- (BOOL)userNameAndPasswordValid:(NSError **)error;
++ (BOOL)userNameAndPasswordValid:(NSError **)error;
 
 @end
