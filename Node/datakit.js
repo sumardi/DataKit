@@ -335,7 +335,6 @@ exports.signUp = function (req, res) {
 
     // Check if user with the given name or email doesn't exist yet
     try {
-      // TODO: hash pw!
       collection = _db.collection.sync(_db, _DKDB.USERS);
       query = {
         $or: [
@@ -357,7 +356,7 @@ exports.signUp = function (req, res) {
       userDoc = {
         _DKUSER_FNAME: uname,
         _DKUSER_FEMAIL: uemail,
-        _DKUSER_FPASSWD: upasswd
+        _DKUSER_FPASSWD: _hash('sha1', upasswd)
       };
       doc = collection.insert.sync(collection, userDoc);
 
@@ -388,11 +387,10 @@ exports.signIn = function (req, res) {
       sessionId = _hash('sha1', uuid.v4() + uname);
 
       // Update session if user is found
-      // TODO: hash pw!
       col = _db.collection.sync(_db, _DKDB.USERS);
       query = {
         _DKUSER_FNAME: uname,
-        _DKUSER_FPASSWD: upasswd
+        _DKUSER_FPASSWD: _hash('sha1', upasswd)
       };
 
       doc = col.findAndModify.sync(
