@@ -11,10 +11,9 @@
 #define UNIMPLEMENTED_ATTRIBUTE
 
 @interface DKUser : DKEntity
-@property (nonatomic, readonly) BOOL isNew UNIMPLEMENTED_ATTRIBUTE;
-@property (nonatomic, copy) NSString *name;
-@property (nonatomic, copy) NSString *password;
-@property (nonatomic, copy) NSString *email;
+@property (nonatomic, copy, readonly) NSString *name;
+@property (nonatomic, copy, readonly) NSString *password;
+@property (nonatomic, copy, readonly) NSString *email;
 
 + (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
 + (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
