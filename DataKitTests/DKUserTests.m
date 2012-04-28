@@ -150,6 +150,17 @@
   STAssertEqualObjects(user2.name, uname2, nil);
   STAssertTrue(user2.sessionToken.length > 0, nil);
   STAssertFalse([user.sessionToken isEqualToString:user2.sessionToken], nil);
+  
+  // Sign out
+  error = nil;
+  success = [DKUser signOut:&error];
+  
+  STAssertNil(error, error.localizedDescription);
+  STAssertTrue(success, nil);
+  
+  DKUser *user3 = [DKUser currentUser];
+  
+  STAssertNil(user3, nil);
 }
 
 @end

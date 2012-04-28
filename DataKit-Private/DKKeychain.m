@@ -32,7 +32,7 @@ NSString *const kDKKeychainAccountName = @"acct";
 
 + (BOOL)removePasswordForService:(NSString *)service account:(NSString *)account error:(NSError **)error {
   OSStatus status = DKKeychainStatusInvalidArguments;
-  if (service.length > 0 && account.length > 0) {
+  if (service.length > 0) {
     NSMutableDictionary *query = [self keychainQueryForService:service account:account];
     status = SecItemDelete((__bridge CFDictionaryRef)query);
   }

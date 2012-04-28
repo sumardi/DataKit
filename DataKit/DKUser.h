@@ -18,8 +18,8 @@
 
 + (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
 + (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
-+ (instancetype)currentUser UNIMPLEMENTED_ATTRIBUTE;
-+ (void)signOut UNIMPLEMENTED_ATTRIBUTE;
++ (instancetype)currentUser;
++ (BOOL)signOut:(NSError **)error;
 
 + (BOOL)requestPasswordResetForUsername:(NSString *)name orEmail:(NSString *)email error:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
