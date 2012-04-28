@@ -418,6 +418,8 @@ exports.signIn = function (req, res) {
 };
 exports.publishObject = function (req, res) {
   doSync(function publishObjectSync() {
+    // TODO: implement special considerations for DKUser entities
+    // - user entities may not be published
     var entity, fn, isFile, oid, q, fields, query, idf, key, col;
     entity = req.param('entity', null);
     oid = req.param('oid', null);
@@ -459,6 +461,10 @@ exports.publishObject = function (req, res) {
 };
 exports.saveObject = function (req, res) {
   doSync(function saveSync() {
+    // TODO: implement special considerations for DKUser entities
+    // - user entities may not be saved without existing object ids
+    // - existing user entities may only be saved by the signed in user himself
+    // - username (and other?) fields may not be saved/changed
     var i, entities, results, errors, ent, entity, oidStr, fset, funset, finc, fpush, fpushAll, faddToSet, fpop, fpullAll, oid, ts, collection, doc, isNew, opts, update, ats, key;
     entities = req.body;
     results = [];
@@ -570,6 +576,8 @@ exports.saveObject = function (req, res) {
 };
 exports.deleteObject = function (req, res) {
   doSync(function deleteSync() {
+    // TODO: implement special considerations for DKUser entities
+    // - user entities may not be deleted by users other than self
     var entity, oidStr, oid, collection, result;
     entity = req.param('entity', null);
     oidStr = req.param('oid', null);
@@ -595,6 +603,9 @@ exports.deleteObject = function (req, res) {
 };
 exports.refreshObject = function (req, res) {
   doSync(function refreshSync() {
+    // TODO: implement special considerations for DKUser entities
+    // - refresh may not return the password hash
+    // - refresh of user entities may only be performed by the authenticated user himself
     var entity, oidStr, oid, collection, result;
     entity = req.param('entity', null);
     oidStr = req.param('oid', null);
@@ -626,6 +637,8 @@ exports.refreshObject = function (req, res) {
 };
 exports.query = function (req, res) {
   doSync(function querySync() {
+    // TODO: implement special considerations for DKUser entities
+    // - user entities may not be queried
     var entity, doFindOne, doCount, query, opts, or, and, refIncl, fieldInclExcl, sort, skip, limit, mr, mrOpts, sortValues, order, results, cursor, collection, result, key, resultCount, i, j, field, dbRef, resolved;
     entity = req.param('entity', null);
     if (!_exists(entity)) {
