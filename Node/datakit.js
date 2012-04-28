@@ -197,13 +197,13 @@ var _streamFileFromGridFS = function (req, res, fn) {
     try {
       gs = gs.open.sync(gs);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       // HTTP: Server Error
       return res.send('', 500);
     }
 
     // Write head
-    console.log(fn, "=>", "content", gs.contentType, "len", gs.length);
+    // console.log(fn, "=>", "content", gs.contentType, "len", gs.length);
     res.writeHead(200, {
       'Connection': 'close',
       'Content-Type': gs.contentType,
