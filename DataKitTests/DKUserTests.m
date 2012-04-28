@@ -10,6 +10,7 @@
 
 #import "DataKit.h"
 #import "DKTests.h"
+#import "DKUser-Private.h"
 
 @implementation DKUserTests
 
@@ -101,6 +102,16 @@
   STAssertTrue(success, nil);
   STAssertNil(error, error.localizedDescription);
   
+  // Create test user 2
+  NSString *uname2 = @"erik2";
+  NSString *upasswd2 = @"mypasswd";
+  
+  error = nil;
+  success = [DKUser signUpUserWithName:uname2 password:upasswd2 email:@"test2@email.xyz" error:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
   // Sign in with wrong credentials
   error = nil;
   success = [DKUser signInUserWithName:uname password:@"wrongpassword" error:&error];
@@ -117,6 +128,28 @@
   
   STAssertTrue(success, nil);
   STAssertNil(error, error.localizedDescription);
+  
+  // Check current user (should be user 1)
+  DKUser *user = [DKUser currentUser];
+
+  STAssertNil(user.password, nil);
+  STAssertEqualObjects(user.name, uname, nil);
+  STAssertTrue(user.sessionToken.length > 0, nil);
+  
+  // Sign in with user 2
+  error = nil;
+  success = [DKUser signInUserWithName:uname2 password:upasswd2 error:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  // Check current user (should be user 2)
+  DKUser *user2 = [DKUser currentUser];
+  
+  STAssertNil(user2.password, nil);
+  STAssertEqualObjects(user2.name, uname2, nil);
+  STAssertTrue(user2.sessionToken.length > 0, nil);
+  STAssertFalse([user.sessionToken isEqualToString:user2.sessionToken], nil);
 }
 
 @end

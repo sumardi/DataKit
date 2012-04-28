@@ -12,6 +12,7 @@
 #import "DKUser-Private.h"
 #import "DKEntity-Private.h"
 #import "NSData+DataKit.h"
+#import "DKKeychain.h"
 
 @implementation DKUser
 DKSynthesize(sessionToken)
@@ -20,6 +21,9 @@ DKSynthesize(sessionToken)
 #define kDKUserNameField @"name"
 #define kDKUserEmailField @"email"
 #define kDKUserPasswdField @"passwd"
+#define kDKUserSessionTokenKey @"sessionToken"
+
+#define kDKUserKeychainServiceName @"com.chocomoko.DataKit.User"
 
 + (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error {
   if (name.length == 0) {
@@ -49,9 +53,9 @@ DKSynthesize(sessionToken)
   
   // Request params
   NSDictionary *requestObjects = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  name, @"name",
-                                  email, @"email",
-                                  password, @"passwd", nil];
+                                  name, kDKUserNameField,
+                                  email, kDKUserEmailField,
+                                  password, kDKUserPasswdField, nil];
   
   // Send request synchronously
   DKRequest *request = [DKRequest request];
@@ -66,7 +70,7 @@ DKSynthesize(sessionToken)
     return NO;
   }
   
-return YES;
+  return YES;
 }
 
 + (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error {
@@ -89,8 +93,8 @@ return YES;
   
   // Request params
   NSDictionary *requestObjects = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  name, @"name",
-                                  password, @"passwd", nil];
+                                  name, kDKUserNameField,
+                                  password, kDKUserPasswdField, nil];
   
   // Send request synchronously
   DKRequest *request = [DKRequest request];
@@ -105,7 +109,62 @@ return YES;
     return NO;
   }
   
+  // Store user in keychain
+  NSMutableDictionary *secureInfo = [NSMutableDictionary dictionaryWithCapacity:3];
+  [secureInfo setObject:name forKey:kDKUserNameField];
+  [secureInfo setObject:password forKey:kDKUserPasswdField];
+  [secureInfo setObject:sessionToken forKey:kDKUserSessionTokenKey];
+  
+  NSData *secureData = [NSKeyedArchiver archivedDataWithRootObject:secureInfo];
+  
+  NSError *kcErr = nil;
+  BOOL success = [DKKeychain storeSecureData:secureData
+                                  forService:kDKUserKeychainServiceName
+                                     account:name
+                                       error:&kcErr];
+  if (!success) {
+    NSLog(@"error: could not store session in keychain (%i)", kcErr.code);
+    
+    return NO;
+  }
+  
   return YES;
+}
+
++ (instancetype)currentUser {
+  NSArray *accounts = [DKKeychain accountsForService:kDKUserKeychainServiceName error:NULL];
+  if (accounts.count > 0) {
+    NSDictionary *account = [accounts objectAtIndex:0];
+    NSString *accountName = [account objectForKey:kDKKeychainAccountName];
+    
+    if (accountName.length > 0) {
+      NSError *kcErr = nil;
+      NSData *secureData = [DKKeychain secureDataForService:kDKUserKeychainServiceName account:accountName error:&kcErr];
+      
+      if (secureData == nil || kcErr != nil) {
+        NSLog(@"error: could not read account data (%i)", kcErr.code);
+      } else {
+        NSDictionary *secureInfo = [NSKeyedUnarchiver unarchiveObjectWithData:secureData];
+        
+        DKUser *user = [DKUser entityWithName:kDKUserEntityName];
+        user.name = [secureInfo objectForKey:kDKUserNameField];
+        
+        // DEVNOTE: It's probably not a good idea to set the raw password on the entity
+        // user.password = [secureInfo objectForKey:kDKUserPasswdField];
+        
+        user.sessionToken = [secureInfo objectForKey:kDKUserSessionTokenKey];
+
+        return user;
+      }
+      
+    } else {
+      NSLog(@"error: could not get account name");
+    }
+  } else {
+    NSLog(@"info: no current user set");
+  }
+  
+  return nil;
 }
 
 - (NSString *)name {

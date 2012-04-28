@@ -42,6 +42,9 @@
 		DC3045E0150E151B00B55702 /* DKMapReduceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3045DF150E151B00B55702 /* DKMapReduceTests.m */; };
 		DC3AB9FB150CAC7700BFD319 /* DKMapReduce.h in Headers */ = {isa = PBXBuildFile; fileRef = DC3AB9F9150CAC7700BFD319 /* DKMapReduce.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC3AB9FC150CAC7700BFD319 /* DKMapReduce.m in Sources */ = {isa = PBXBuildFile; fileRef = DC3AB9FA150CAC7700BFD319 /* DKMapReduce.m */; };
+		DC417A5C154BF00D0060245F /* DKKeychain.h in Headers */ = {isa = PBXBuildFile; fileRef = DC417A5A154BF00D0060245F /* DKKeychain.h */; };
+		DC417A5D154BF00D0060245F /* DKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = DC417A5B154BF00D0060245F /* DKKeychain.m */; };
+		DC417A5F154C54090060245F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCCEDBD0154AB1CC00C329C7 /* Security.framework */; };
 		DC52508714FA4F2C00646185 /* DKEntity-Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DC52508514FA4F2C00646185 /* DKEntity-Private.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC52509814FAE1DC00646185 /* NSData+DataKit.h in Headers */ = {isa = PBXBuildFile; fileRef = DC52509614FAE1DC00646185 /* NSData+DataKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DC52509914FAE1DC00646185 /* NSData+DataKit.m in Sources */ = {isa = PBXBuildFile; fileRef = DC52509714FAE1DC00646185 /* NSData+DataKit.m */; };
@@ -114,6 +117,8 @@
 		DC3045DF150E151B00B55702 /* DKMapReduceTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKMapReduceTests.m; sourceTree = "<group>"; };
 		DC3AB9F9150CAC7700BFD319 /* DKMapReduce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKMapReduce.h; sourceTree = "<group>"; };
 		DC3AB9FA150CAC7700BFD319 /* DKMapReduce.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKMapReduce.m; sourceTree = "<group>"; };
+		DC417A5A154BF00D0060245F /* DKKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DKKeychain.h; sourceTree = "<group>"; };
+		DC417A5B154BF00D0060245F /* DKKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DKKeychain.m; sourceTree = "<group>"; };
 		DC52508514FA4F2C00646185 /* DKEntity-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DKEntity-Private.h"; sourceTree = "<group>"; };
 		DC52509614FAE1DC00646185 /* NSData+DataKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+DataKit.h"; sourceTree = "<group>"; };
 		DC52509714FAE1DC00646185 /* NSData+DataKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+DataKit.m"; sourceTree = "<group>"; };
@@ -168,6 +173,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC417A5F154C54090060245F /* Security.framework in Frameworks */,
 				DC16231A150BBC8A00F12198 /* CoreGraphics.framework in Frameworks */,
 				DC162319150BBC7E00F12198 /* UIKit.framework in Frameworks */,
 				DC03846F14F68EA1000DADD6 /* SenTestingKit.framework in Frameworks */,
@@ -279,6 +285,8 @@
 				DC0C9D2E1549AD49005085BA /* DKUser-Private.h */,
 				DC5B610A14F7B1FE00CC5B42 /* DKRequest.h */,
 				DC5B610B14F7B1FE00CC5B42 /* DKRequest.m */,
+				DC417A5A154BF00D0060245F /* DKKeychain.h */,
+				DC417A5B154BF00D0060245F /* DKKeychain.m */,
 				DC5B611314F7E6CD00CC5B42 /* NSError+DataKit.h */,
 				DC5B611414F7E6CD00CC5B42 /* NSError+DataKit.m */,
 				DC52509614FAE1DC00646185 /* NSData+DataKit.h */,
@@ -317,6 +325,7 @@
 				DC957A2C1541A746008683DB /* NSURLConnection+Timeout.h in Headers */,
 				DC8C008F154887E4003838A7 /* DKUser.h in Headers */,
 				DC0C9D2F1549AD49005085BA /* DKUser-Private.h in Headers */,
+				DC417A5C154BF00D0060245F /* DKKeychain.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,6 +470,7 @@
 				DC80DAC71534293700A6857A /* DKNetworkActivity.m in Sources */,
 				DC957A2D1541A746008683DB /* NSURLConnection+Timeout.m in Sources */,
 				DC8C0090154887E4003838A7 /* DKUser.m in Sources */,
+				DC417A5D154BF00D0060245F /* DKKeychain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
