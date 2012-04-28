@@ -203,7 +203,6 @@ var _streamFileFromGridFS = function (req, res, fn) {
     }
 
     // Write head
-    // HTTP: Partial Content
     console.log(fn, "=>", "content", gs.contentType, "len", gs.length);
     res.writeHead(200, {
       'Connection': 'close',
