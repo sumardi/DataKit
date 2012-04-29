@@ -145,7 +145,7 @@
   DKUser *user = [DKUser currentUser];
 
   STAssertEqualObjects(user.name, uname, nil);
-  STAssertTrue(user.password.length > 0, nil);
+  STAssertNil(user.password, nil);
   STAssertTrue(user.sessionToken.length > 0, nil);
   
   // Sign in with user 2
@@ -159,7 +159,7 @@
   DKUser *user2 = [DKUser currentUser];
   
   STAssertEqualObjects(user2.name, uname2, nil);
-  STAssertTrue(user2.password.length > 0, nil);
+  STAssertNil(user2.password, nil);
   STAssertTrue(user2.sessionToken.length > 0, nil);
   STAssertFalse([user.sessionToken isEqualToString:user2.sessionToken], nil);
   

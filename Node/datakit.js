@@ -75,11 +75,6 @@ var _method = function (name, secure) {
         return;
       }
 
-      // TODO: remove
-      if (req.user) {
-        console.log("req.user =>", req.user, "secure =>", secure);
-      }
-
       return m(req, res);
     });
   };
@@ -425,7 +420,7 @@ exports.signIn = function (req, res) {
     if (doc) {
       // TODO: remove log
       console.log("signed in:", uname, "sid =>", doc.sid);
-      return res.json(doc, 200);
+      return res.json(doc.sid, 200);
     }
   } catch (e) {
     console.error(e);
@@ -505,13 +500,16 @@ exports.saveObject = function (req, res) {
       // - username (and other?) fields may not be saved/changed
       if (entity === _DKDB.USERS) {
         // Allow modification of an user entity only by the user himself
-        if (!req.user || oidStr !== req.user._id.toString()) {
+        if (req.user) {
+          oidStr = req.user._id.toString();
+        }
+        if (!oidStr) {
           errors.push(new Error('Cannot create user manually, need to sign up first'));
           continue;
         }
 
         // Prevent changing special fields
-        dfields = ['name', 'email', 'passwd', '_id', '_seq', '_updated'];
+        dfields = ['name', 'email', 'passwd', 'sid', '_id', '_seq', '_updated'];
         err = null;
         for (fi in dfields) {
           if (dfields.hasOwnProperty(fi)) {

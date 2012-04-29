@@ -20,7 +20,7 @@
 #define kDKUserNameField @"name"
 #define kDKUserEmailField @"email"
 #define kDKUserPasswdField @"passwd"
-#define kDKUserSessionIDField @"sid"
+#define kDKUserSessionField @"sid"
 
 #define kDKUserKeychainServiceName @"com.chocomoko.DataKit.User"
 
@@ -100,16 +100,21 @@
   request.cachePolicy = DKCachePolicyIgnoreCache;
   
   NSError *requestError = nil;
-  NSDictionary *entityDict = [request sendRequestWithObject:requestObjects method:@"signIn" error:&requestError];
-  if (requestError != nil || entityDict.count == 0) {
+  NSString *sessionToken = [request sendRequestWithObject:requestObjects method:@"signIn" error:&requestError];
+  if (requestError != nil || sessionToken.length == 0) {
     if (error != nil) {
       *error = requestError;
     }
     return NO;
   }
   
-  // Store user in keychain  
-  NSData *secureData = [NSKeyedArchiver archivedDataWithRootObject:entityDict];
+  // Store user in keychain
+  NSMutableDictionary *secureInfo = [NSMutableDictionary dictionaryWithCapacity:3];
+  [secureInfo setObject:name forKey:kDKUserNameField];
+  [secureInfo setObject:password forKey:kDKUserPasswdField];
+  [secureInfo setObject:sessionToken forKey:kDKUserSessionField];
+  
+  NSData *secureData = [NSKeyedArchiver archivedDataWithRootObject:secureInfo];
   
   NSError *kcErr = nil;
   BOOL success = [DKKeychain storeSecureData:secureData
@@ -138,11 +143,11 @@
       if (secureData == nil || kcErr != nil) {
         NSLog(@"error: could not read account data (%i)", kcErr.code);
       } else {
-        NSDictionary *entityDict = [NSKeyedUnarchiver unarchiveObjectWithData:secureData];
+        NSMutableDictionary *userInfo = [[NSKeyedUnarchiver unarchiveObjectWithData:secureData] mutableCopy];
+        [userInfo removeObjectForKey:kDKUserPasswdField];
         
-        // TODO: Update stored user info on save
         DKUser *user = [DKUser entityWithName:kDKUserEntityName];
-        user.resultMap = entityDict;
+        user.resultMap = [NSDictionary dictionaryWithDictionary:userInfo];
 
         return user;
       }
@@ -190,11 +195,11 @@
 }
 
 - (NSString *)sessionToken {
-  return [[self objectForKey:kDKUserSessionIDField] copy];
+  return [[self objectForKey:kDKUserSessionField] copy];
 }
 
 - (void)setSessionToken:(NSString *)sessionToken {
-  [self setObject:[sessionToken copy] forKey:kDKUserSessionIDField];
+  [self setObject:[sessionToken copy] forKey:kDKUserSessionField];
 }
 
 @end
