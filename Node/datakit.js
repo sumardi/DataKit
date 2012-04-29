@@ -511,7 +511,7 @@ exports.saveObject = function (req, res) {
         }
 
         // Prevent changing special fields
-        dfields = ['name', 'email', '_id', '_seq', '_updated'];
+        dfields = ['name', 'email', 'passwd', '_id', '_seq', '_updated'];
         err = null;
         for (fi in dfields) {
           if (dfields.hasOwnProperty(fi)) {
