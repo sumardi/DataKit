@@ -34,28 +34,36 @@ var _safe = function (v, d) {
 };
 var _method = function (name, secure) {
   return function (req, res) {
-    var m = exports[name];
-    req.dkSession = req.header('x-datakit-session', null);
-    // if (m.session) {
-    //   TODO: load user
-    // }
-    req.dkSecure = _safe(secure, true);
-    req.dkSecret = req.header('x-datakit-secret', null);
-    if (secure && req.dkSecret !== _conf.secret) {
-      res.header('WWW-Authenticate', 'datakit-secret');
-      res.send(401);
+    doSync(function syncMethod() {
+      var m, s, secret;
+      m = exports[name];
+      s = req.header('x-datakit-session', null);
+      if (s) {
+        req.user = "user:erik"; // TODO: fetch from db
+      }
+      secure = _safe(secure, true);
+      secret = req.header('x-datakit-secret', null);
 
-      return;
-    }
+      console.log(name, ": secret =>", secret);
+      if (secure && secret !== _conf.secret) {
+        res.header('WWW-Authenticate', 'datakit-secret');
+        res.send(401);
 
-    // TODO: remove
-    console.log("sess =>", req.dkSession, "secure =>", req.dkSecure);
+        return;
+      }
 
-    return m(req, res);
+      // TODO: remove
+      console.log("req.user =>", req.user, "secure =>", secure);
+
+      return m(req, res);
+    });
   };
 };
 var _secureMethod = function (name) {
   return _method(name, true);
+};
+var _unsecureMethod = function (name) {
+  return _method(name, false);
 };
 var _mkdirs = function (dirs, mode, cb) {
   var f = function next(e) {
@@ -71,8 +79,8 @@ var _createRoutes = function (path) {
   var m = function (p) {
     return path + '/' + _safe(p, '');
   };
-  app.get(m(), _method('info'));
-  app.get(m('public/:key'), _method('getPublishedObject'));
+  app.get(m(), _unsecureMethod('info'));
+  app.get(m('public/:key'), _unsecureMethod('getPublishedObject'));
   app.post(m('signUp'), _secureMethod('signUp'));
   app.post(m('signIn'), _secureMethod('signIn'));
   app.post(m('publish'), _secureMethod('publishObject'));
@@ -196,38 +204,36 @@ var _generateNextSequenceNumber = function (entity) {
   return doc.seq;
 };
 var _streamFileFromGridFS = function (req, res, fn) {
-  doSync(function streamFileSync() {
-    var gs, stream;
-    if (!fn) {
-      // HTTP: Not Found
-      return res.send('', 404);
-    }
+  var gs, stream;
+  if (!fn) {
+    // HTTP: Not Found
+    return res.send('', 404);
+  }
 
-    // Open grid store
-    gs = new mongo.GridStore(_db, fn, 'r');
-    try {
-      gs = gs.open.sync(gs);
-    } catch (e) {
-      console.error(e);
-      // HTTP: Server Error
-      return res.send('', 500);
-    }
+  // Open grid store
+  gs = new mongo.GridStore(_db, fn, 'r');
+  try {
+    gs = gs.open.sync(gs);
+  } catch (e) {
+    console.error(e);
+    // HTTP: Server Error
+    return res.send('', 500);
+  }
 
-    // Write head
-    // console.log(fn, "=>", "content", gs.contentType, "len", gs.length);
-    res.writeHead(200, {
-      'Connection': 'close',
-      'Content-Type': gs.contentType,
-      'Content-Length': gs.length
-    });
+  // Write head
+  // console.log(fn, "=>", "content", gs.contentType, "len", gs.length);
+  res.writeHead(200, {
+    'Connection': 'close',
+    'Content-Type': gs.contentType,
+    'Content-Length': gs.length
+  });
 
-    stream = gs.stream(true);
-    stream.on('data', function (data) {
-      res.write(data);
-    });
-    stream.on('close', function () {
-      res.end();
-    });
+  stream = gs.stream(true);
+  stream.on('data', function (data) {
+    res.write(data);
+  });
+  stream.on('close', function () {
+    res.end();
   });
 };
 // prototypes
@@ -305,690 +311,660 @@ exports.info = function (req, res) {
   res.send('datakit', 200);
 };
 exports.getPublishedObject = function (req, res) {
-  doSync(function publicSync() {
-    var key, col, result, oid, fields;
-    key = req.param('key', null);
-    if (!_exists(key)) {
-      return res.send(404);
-    }
-    try {
-      col = _db.collection.sync(_db, _DKDB.PUBLIC_OBJECTS);
-      result = col.findOne.sync(col, {'_id': key});
-
-      if (result.isFile) {
-        return _streamFileFromGridFS(req, res, result.q);
-      } else {
-        oid = new mongo.ObjectID(result.q.oid);
-        fields = result.q.fields;
-
-        col = _db.collection.sync(_db, result.q.entity);
-        result = col.findOne.sync(col, {'_id': oid}, fields);
-
-        if (fields.length === 1) {
-          return res.send(result[fields[0]], 200);
-        } else {
-          return res.json(result, 200);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
+  var key, col, result, oid, fields;
+  key = req.param('key', null);
+  if (!_exists(key)) {
     return res.send(404);
-  });
+  }
+  try {
+    col = _db.collection.sync(_db, _DKDB.PUBLIC_OBJECTS);
+    result = col.findOne.sync(col, {'_id': key});
+
+    if (result.isFile) {
+      return _streamFileFromGridFS(req, res, result.q);
+    } else {
+      oid = new mongo.ObjectID(result.q.oid);
+      fields = result.q.fields;
+
+      col = _db.collection.sync(_db, result.q.entity);
+      result = col.findOne.sync(col, {'_id': oid}, fields);
+
+      if (fields.length === 1) {
+        return res.send(result[fields[0]], 200);
+      } else {
+        return res.json(result, 200);
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+  return res.send(404);
 };
 exports.signUp = function (req, res) {
-  doSync(function signUpSync() {
-    var uname, upasswd, uemail, collection, cursor, query, count, userDoc, doc;
-    uname = req.param('name', null);
-    upasswd = req.param('passwd', null);
-    uemail = req.param('email', null);
-    if (!uname || !upasswd || !uemail || uname.length < 4 || upasswd.length < 8) {
-      return _e(res, _ERR.INVALID_PARAMS);
+  var uname, upasswd, uemail, collection, cursor, query, count, userDoc, doc;
+  uname = req.param('name', null);
+  upasswd = req.param('passwd', null);
+  uemail = req.param('email', null);
+  if (!uname || !upasswd || !uemail || uname.length < 4 || upasswd.length < 8) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+
+  // Check if user with the given name or email doesn't exist yet
+  try {
+    collection = _db.collection.sync(_db, _DKDB.USERS);
+    query = {
+      $or: [
+        {'name': uname},
+        {'email': uemail}
+      ]
+    };
+    cursor = collection.find.sync(collection, query);
+    count = cursor.count.sync(cursor);
+
+    if (count !== 0) {
+      return _e(res, _ERR.DUPLICATE_KEY);
     }
-
-    // Check if user with the given name or email doesn't exist yet
-    try {
-      collection = _db.collection.sync(_db, _DKDB.USERS);
-      query = {
-        $or: [
-          {'name': uname},
-          {'email': uemail}
-        ]
-      };
-      cursor = collection.find.sync(collection, query);
-      count = cursor.count.sync(cursor);
-
-      if (count !== 0) {
-        return _e(res, _ERR.DUPLICATE_KEY);
-      }
-    } catch (e) {
-      return _e(res, _ERR.OPERATION_FAILED);
-    }
-
-    try {
-      userDoc = {
-        'name': uname,
-        'email': uemail,
-        'passwd': _hash('sha1', upasswd)
-      };
-      doc = collection.insert.sync(collection, userDoc);
-
-      // TODO:
-      // - remove log
-      // - send activation email ??
-      console.log("signed up:", uname);
-
-      return res.send('', 200);
-    } catch (e2) {
-      console.error(e2);
-    }
-
+  } catch (e) {
     return _e(res, _ERR.OPERATION_FAILED);
-  });
+  }
+
+  try {
+    userDoc = {
+      'name': uname,
+      'email': uemail,
+      'passwd': _hash('sha1', upasswd)
+    };
+    doc = collection.insert.sync(collection, userDoc);
+
+    // TODO:
+    // - remove log
+    // - send activation email ??
+    console.log("signed up:", uname);
+
+    return res.send('', 200);
+  } catch (e2) {
+    console.error(e2);
+  }
+
+  return _e(res, _ERR.OPERATION_FAILED);
 };
 exports.signIn = function (req, res) {
-  doSync(function signInSync() {
-    var uname, upasswd, signature, sessionId, col, query, doc;
-    uname = req.param('name', null);
-    upasswd = req.param('passwd', null);
-    if (!uname || !upasswd) {
-      return _e(res, _ERR.INVALID_PARAMS);
+  var uname, upasswd, signature, sessionId, col, query, doc;
+  uname = req.param('name', null);
+  upasswd = req.param('passwd', null);
+  if (!uname || !upasswd) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+
+  try {
+    // Create new session ID
+    sessionId = _hash('sha1', uuid.v4() + uname);
+
+    // Update session if user is found
+    col = _db.collection.sync(_db, _DKDB.USERS);
+    query = {
+      'name': uname,
+      'passwd': _hash('sha1', upasswd)
+    };
+
+    doc = col.findAndModify.sync(
+      col,
+      query,
+      [],
+      {'$set': {'sid': sessionId}},
+      {'safe': true, 'new': true}
+    );
+    if (doc) {
+      // TODO: remove log
+      console.log("signed in:", uname, "sid =>", doc.sid);
+      return res.json(doc.sid, 200);
     }
+  } catch (e) {
+    console.error(e);
+  }
 
-    try {
-      // Create new session ID
-      sessionId = _hash('sha1', uuid.v4() + uname);
-
-      // Update session if user is found
-      col = _db.collection.sync(_db, _DKDB.USERS);
-      query = {
-        'name': uname,
-        'passwd': _hash('sha1', upasswd)
-      };
-
-      doc = col.findAndModify.sync(
-        col,
-        query,
-        [],
-        {'$set': {'sid': sessionId}},
-        {'safe': true, 'new': true}
-      );
-      if (doc) {
-        // TODO: remove log
-        console.log("signed in:", uname, "sid =>", doc.sid);
-        return res.json(doc.sid, 200);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    return _e(res, _ERR.OPERATION_FAILED);
-  });
+  return _e(res, _ERR.OPERATION_FAILED);
 };
 exports.publishObject = function (req, res) {
-  doSync(function publishObjectSync() {
-    // TODO: implement special considerations for DKUser entities
-    // - user entities may not be published
-    var entity, fn, isFile, oid, q, fields, query, idf, key, col;
-    entity = req.param('entity', null);
-    oid = req.param('oid', null);
-    fn = req.param('fileName', null);
-    idf = null;
-    isFile = false;
-    if (_exists(fn)) {
-      idf = "file:" + fn;
-      isFile = true;
-    } else if (_exists(entity) && _exists(oid)) {
-      fields = req.param('fields', null);
-      query = {
-        'entity': entity,
-        'oid': oid,
-        'fields': []
-      };
-      if (fields !== null && fields.length > 0) {
-        query.fields = fields;
-      }
-      idf = JSON.stringify(query);
-    } else {
-      return _e(res, _ERR.INVALID_PARAMS);
+  // TODO: implement special considerations for DKUser entities
+  // - user entities may not be published
+  var entity, fn, isFile, oid, q, fields, query, idf, key, col;
+  entity = req.param('entity', null);
+  oid = req.param('oid', null);
+  fn = req.param('fileName', null);
+  idf = null;
+  isFile = false;
+  if (_exists(fn)) {
+    idf = "file:" + fn;
+    isFile = true;
+  } else if (_exists(entity) && _exists(oid)) {
+    fields = req.param('fields', null);
+    query = {
+      'entity': entity,
+      'oid': oid,
+      'fields': []
+    };
+    if (fields !== null && fields.length > 0) {
+      query.fields = fields;
     }
+    idf = JSON.stringify(query);
+  } else {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
 
-    // Compute key
-    key = _hash('sha256', _conf.secret + _conf.salt + idf);
+  // Compute key
+  key = _hash('sha256', _conf.secret + _conf.salt + idf);
 
-    try {
-      q = isFile ? fn : query;
-      col = _db.collection.sync(_db, _DKDB.PUBLIC_OBJECTS);
-      col.update.sync(col, {'_id': key}, {'$set': {'q': q, 'isFile': isFile}}, {'safe': true, 'upsert': true});
+  try {
+    q = isFile ? fn : query;
+    col = _db.collection.sync(_db, _DKDB.PUBLIC_OBJECTS);
+    col.update.sync(col, {'_id': key}, {'$set': {'q': q, 'isFile': isFile}}, {'safe': true, 'upsert': true});
 
-      return res.json({'key': key}, 200);
-    } catch (e) {
-      console.error(e);
-      return _e(res, _ERR.OPERATION_FAILED, e);
-    }
-  });
+    return res.json({'key': key}, 200);
+  } catch (e) {
+    console.error(e);
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
 };
 exports.saveObject = function (req, res) {
-  doSync(function saveSync() {
-    // TODO: implement special considerations for DKUser entities
-    // - user entities may not be saved without existing object ids
-    // - existing user entities may only be saved by the signed in user himself
-    // - username (and other?) fields may not be saved/changed
-    var i, entities, results, errors, ent, entity, oidStr, fset, funset, finc, fpush, fpushAll, faddToSet, fpop, fpullAll, oid, ts, collection, doc, isNew, opts, update, ats, key;
-    entities = req.body;
-    results = [];
-    errors = [];
+  // TODO: implement special considerations for DKUser entities
+  // - user entities may not be saved without existing object ids
+  // - existing user entities may only be saved by the signed in user himself
+  // - username (and other?) fields may not be saved/changed
+  var i, entities, results, errors, ent, entity, oidStr, fset, funset, finc, fpush, fpushAll, faddToSet, fpop, fpullAll, oid, ts, collection, doc, isNew, opts, update, ats, key;
+  entities = req.body;
+  results = [];
+  errors = [];
 
-    for (i in entities) {
-      if (entities.hasOwnProperty(i)) {
-        ent = entities[i];
-        entity = _safe(ent.entity, null);
-        if (!_exists(entity)) {
+  for (i in entities) {
+    if (entities.hasOwnProperty(i)) {
+      ent = entities[i];
+      entity = _safe(ent.entity, null);
+      if (!_exists(entity)) {
+        return _e(res, _ERR.INVALID_PARAMS);
+      }
+      oidStr = _safe(ent.oid, null);
+      fset = _safe(ent.set, {});
+      funset = _safe(ent.unset, null);
+      finc = _safe(ent.inc, null);
+      fpush = _safe(ent.push, null);
+      fpushAll = _safe(ent.pushAll, null);
+      faddToSet = _safe(ent.addToSet, null);
+      fpop = _safe(ent.pop, null);
+      fpullAll = _safe(ent.pullAll, null);
+      oid = null;
+
+      _decodeDkObj(fset);
+      _decodeDkObj(fpush);
+      _decodeDkObj(fpushAll);
+      _decodeDkObj(faddToSet);
+      _decodeDkObj(fpullAll);
+
+      if (_exists(oidStr)) {
+        oid = new mongo.ObjectID(oidStr);
+        if (!_exists(oid)) {
           return _e(res, _ERR.INVALID_PARAMS);
         }
-        oidStr = _safe(ent.oid, null);
-        fset = _safe(ent.set, {});
-        funset = _safe(ent.unset, null);
-        finc = _safe(ent.inc, null);
-        fpush = _safe(ent.push, null);
-        fpushAll = _safe(ent.pushAll, null);
-        faddToSet = _safe(ent.addToSet, null);
-        fpop = _safe(ent.pop, null);
-        fpullAll = _safe(ent.pullAll, null);
-        oid = null;
+      }
+      try {
+        ts = parseInt((new Date().getTime()) / 1000, 10);
+        collection = _db.collection.sync(_db, entity);
+        isNew = (oid === null);
 
-        _decodeDkObj(fset);
-        _decodeDkObj(fpush);
-        _decodeDkObj(fpushAll);
-        _decodeDkObj(faddToSet);
-        _decodeDkObj(fpullAll);
+        // Automatically insert the update timestamp
+        fset._updated = ts;
 
-        if (_exists(oidStr)) {
-          oid = new mongo.ObjectID(oidStr);
-          if (!_exists(oid)) {
-            return _e(res, _ERR.INVALID_PARAMS);
-          }
+        // Insert new object
+        if (isNew) {
+          // Generate new sequence number         
+          fset._seq = _generateNextSequenceNumber(entity);
+          doc = collection.insert.sync(collection, fset);
+          oid = doc[0]._id;
         }
-        try {
-          ts = parseInt((new Date().getTime()) / 1000, 10);
-          collection = _db.collection.sync(_db, entity);
-          isNew = (oid === null);
 
-          // Automatically insert the update timestamp
-          fset._updated = ts;
-
-          // Insert new object
-          if (isNew) {
-            // Generate new sequence number         
-            fset._seq = _generateNextSequenceNumber(entity);
-            doc = collection.insert.sync(collection, fset);
-            oid = doc[0]._id;
-          }
-
-          // Update instead if oid exists, or an operation needs to be executed
-          // that requires an insert first.
-          opts = {'upsert': true, 'new': true};
-          update = {};
-          if (_exists(fset) && !isNew) {
-            update.$set = fset;
-          }
-          if (_exists(funset)) {
-            update.$unset = funset;
-          }
-          if (_exists(finc)) {
-            update.$inc = finc;
-          }
-          if (_exists(fpush)) {
-            update.$push = fpush;
-          }
-          if (_exists(fpushAll)) {
-            update.$pushAll = fpushAll;
-          }
-          if (_exists(faddToSet)) {
-            ats = {};
-            for (key in faddToSet) {
-              if (faddToSet.hasOwnProperty(key)) {
-                ats[key] = {'$each': faddToSet[key]};
-              }
+        // Update instead if oid exists, or an operation needs to be executed
+        // that requires an insert first.
+        opts = {'upsert': true, 'new': true};
+        update = {};
+        if (_exists(fset) && !isNew) {
+          update.$set = fset;
+        }
+        if (_exists(funset)) {
+          update.$unset = funset;
+        }
+        if (_exists(finc)) {
+          update.$inc = finc;
+        }
+        if (_exists(fpush)) {
+          update.$push = fpush;
+        }
+        if (_exists(fpushAll)) {
+          update.$pushAll = fpushAll;
+        }
+        if (_exists(faddToSet)) {
+          ats = {};
+          for (key in faddToSet) {
+            if (faddToSet.hasOwnProperty(key)) {
+              ats[key] = {'$each': faddToSet[key]};
             }
-            update.$addToSet = ats;
           }
-          if (_exists(fpop)) {
-            update.$pop = fpop;
-          }
-          if (_exists(fpullAll)) {
-            update.$pullAll = fpullAll;
-          }
-
-          // Find and modify
-          if (!isNew || (isNew && Object.keys(update).length > 0)) {
-            doc = collection.findAndModify.sync(collection, {'_id': oid}, [], update, opts);
-          }
-
-          if (doc.length > 0) {
-            doc = doc[0];
-          }
-
-          _encodeDkObj(doc);
-
-          results.push(doc);
-        } catch (e) {
-          errors.push(e);
+          update.$addToSet = ats;
         }
+        if (_exists(fpop)) {
+          update.$pop = fpop;
+        }
+        if (_exists(fpullAll)) {
+          update.$pullAll = fpullAll;
+        }
+
+        // Find and modify
+        if (!isNew || (isNew && Object.keys(update).length > 0)) {
+          doc = collection.findAndModify.sync(collection, {'_id': oid}, [], update, opts);
+        }
+
+        if (doc.length > 0) {
+          doc = doc[0];
+        }
+
+        _encodeDkObj(doc);
+
+        results.push(doc);
+      } catch (e) {
+        errors.push(e);
       }
     }
-    if (errors.length > 0) {
-      return _e(res, _ERR.OPERATION_FAILED, errors.pop());
-    }
-    res.json(results, 200);
-  });
+  }
+  if (errors.length > 0) {
+    return _e(res, _ERR.OPERATION_FAILED, errors.pop());
+  }
+  res.json(results, 200);
 };
 exports.deleteObject = function (req, res) {
-  doSync(function deleteSync() {
-    // TODO: implement special considerations for DKUser entities
-    // - user entities may not be deleted by users other than self
-    var entity, oidStr, oid, collection, result;
-    entity = req.param('entity', null);
-    oidStr = req.param('oid', null);
-    if (!_exists(entity)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    if (!_exists(oidStr)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    oid = new mongo.ObjectID(oidStr);
-    if (!_exists(oid)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    try {
-      collection = _db.collection.sync(_db, entity);
-      result = collection.remove.sync(collection, {'_id': oid}, {'safe': true});
-      res.send('', 200);
-    } catch (e) {
-      console.error(e);
-      return _e(res, _ERR.OPERATION_FAILED, e);
-    }
-  });
+  // TODO: implement special considerations for DKUser entities
+  // - user entities may not be deleted by users other than self
+  var entity, oidStr, oid, collection, result;
+  entity = req.param('entity', null);
+  oidStr = req.param('oid', null);
+  if (!_exists(entity)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  if (!_exists(oidStr)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  oid = new mongo.ObjectID(oidStr);
+  if (!_exists(oid)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  try {
+    collection = _db.collection.sync(_db, entity);
+    result = collection.remove.sync(collection, {'_id': oid}, {'safe': true});
+    res.send('', 200);
+  } catch (e) {
+    console.error(e);
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
 };
 exports.refreshObject = function (req, res) {
-  doSync(function refreshSync() {
-    // TODO: implement special considerations for DKUser entities
-    // - refresh may not return the password hash
-    // - refresh of user entities may only be performed by the authenticated user himself
-    var entity, oidStr, oid, collection, result;
-    entity = req.param('entity', null);
-    oidStr = req.param('oid', null);
-    if (!_exists(entity)) {
-      return _e(res, _ERR.INVALID_PARAMS);
+  // TODO: implement special considerations for DKUser entities
+  // - refresh may not return the password hash
+  // - refresh of user entities may only be performed by the authenticated user himself
+  var entity, oidStr, oid, collection, result;
+  entity = req.param('entity', null);
+  oidStr = req.param('oid', null);
+  if (!_exists(entity)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  if (!_exists(oidStr)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  oid = new mongo.ObjectID(oidStr);
+  if (!_exists(oid)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  try {
+    collection = _db.collection.sync(_db, entity);
+    result = collection.findOne.sync(collection, {'_id': oid});
+    if (!_exists(result)) {
+      throw 'Could not find object';
     }
-    if (!_exists(oidStr)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    oid = new mongo.ObjectID(oidStr);
-    if (!_exists(oid)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    try {
-      collection = _db.collection.sync(_db, entity);
-      result = collection.findOne.sync(collection, {'_id': oid});
-      if (!_exists(result)) {
-        throw 'Could not find object';
-      }
 
-      _encodeDkObj(result);
+    _encodeDkObj(result);
 
-      res.json(result, 200);
-    } catch (e) {
-      console.error(e);
-      return _e(res, _ERR.OPERATION_FAILED, e);
-    }
-  });
+    res.json(result, 200);
+  } catch (e) {
+    console.error(e);
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
 };
 exports.query = function (req, res) {
-  doSync(function querySync() {
-    // TODO: implement special considerations for DKUser entities
-    // - user entities may not be queried
-    var entity, doFindOne, doCount, query, opts, or, and, refIncl, fieldInclExcl, sort, skip, limit, mr, mrOpts, sortValues, order, results, cursor, collection, result, key, resultCount, i, j, field, dbRef, resolved;
-    entity = req.param('entity', null);
-    if (!_exists(entity)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    doFindOne = req.param('findOne', false);
-    doCount = req.param('count', false);
-    query = req.param('q', {});
-    opts = {};
-    or = req.param('or', null);
-    and = req.param('and', null);
-    refIncl = req.param('refIncl', []);
-    fieldInclExcl = req.param('fieldInEx', null);
-    sort = req.param('sort', null);
-    skip = req.param('skip', null);
-    limit = req.param('limit', null);
-    mr = req.param('mr', null);
+  // TODO: implement special considerations for DKUser entities
+  // - user entities may not be queried
+  var entity, doFindOne, doCount, query, opts, or, and, refIncl, fieldInclExcl, sort, skip, limit, mr, mrOpts, sortValues, order, results, cursor, collection, result, key, resultCount, i, j, field, dbRef, resolved;
+  entity = req.param('entity', null);
+  if (!_exists(entity)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  doFindOne = req.param('findOne', false);
+  doCount = req.param('count', false);
+  query = req.param('q', {});
+  opts = {};
+  or = req.param('or', null);
+  and = req.param('and', null);
+  refIncl = req.param('refIncl', []);
+  fieldInclExcl = req.param('fieldInEx', null);
+  sort = req.param('sort', null);
+  skip = req.param('skip', null);
+  limit = req.param('limit', null);
+  mr = req.param('mr', null);
 
-    if (_exists(or)) {
-      query.$or = or;
-    }
-    if (_exists(and)) {
-      query.$and = and;
-    }
-    if (_exists(sort)) {
-      sortValues = [];
-      for (key in sort) {
-        if (sort.hasOwnProperty(key)) {
-          order = (sort[key] === 1) ? 'asc' : 'desc';
-          sortValues.push([key, order]);
-        }
+  if (_exists(or)) {
+    query.$or = or;
+  }
+  if (_exists(and)) {
+    query.$and = and;
+  }
+  if (_exists(sort)) {
+    sortValues = [];
+    for (key in sort) {
+      if (sort.hasOwnProperty(key)) {
+        order = (sort[key] === 1) ? 'asc' : 'desc';
+        sortValues.push([key, order]);
       }
-      opts.sort = sortValues;
     }
-    if (_exists(skip)) {
-      opts.skip = parseInt(skip, 10);
-    }
-    if (_exists(limit)) {
-      opts.limit = parseInt(limit, 10);
-    }
+    opts.sort = sortValues;
+  }
+  if (_exists(skip)) {
+    opts.skip = parseInt(skip, 10);
+  }
+  if (_exists(limit)) {
+    opts.limit = parseInt(limit, 10);
+  }
 
-    // replace oid strings with oid objects
-    _traverse(query, function (key, value) {
-      if (key === '_id') {
-        this[key] = new mongo.ObjectID(value);
+  // replace oid strings with oid objects
+  _traverse(query, function (key, value) {
+    if (key === '_id') {
+      this[key] = new mongo.ObjectID(value);
+    }
+  });
+
+  try {
+    // console.log('query', entity, '=>',
+    //             JSON.stringify(query),
+    //             JSON.stringify(fieldInclExcl),
+    //             JSON.stringify(opts));
+
+    collection = _db.collection.sync(_db, entity);
+
+    if (mr !== null) {
+      mrOpts = {
+        'query': query,
+        'out': {'inline': 1}
+      };
+      // if (_exists(opts.sort)) {
+      //   mrOpts.sort = opts.sort;
+      // }
+      if (_exists(opts.limit)) {
+        mrOpts.limit = opts.limit;
       }
-    });
-
-    try {
-      // console.log('query', entity, '=>',
-      //             JSON.stringify(query),
-      //             JSON.stringify(fieldInclExcl),
-      //             JSON.stringify(opts));
-
-      collection = _db.collection.sync(_db, entity);
-
-      if (mr !== null) {
-        mrOpts = {
-          'query': query,
-          'out': {'inline': 1}
-        };
-        // if (_exists(opts.sort)) {
-        //   mrOpts.sort = opts.sort;
-        // }
-        if (_exists(opts.limit)) {
-          mrOpts.limit = opts.limit;
-        }
-        if (_exists(mr.context)) {
-          mrOpts.scope = mr.context;
-        }
-        if (_exists(mr.finalize)) {
-          mrOpts.finalize = mr.finalize;
-        }
-        results = collection.mapReduce.sync(
-          collection,
-          mr.map,
-          mr.reduce,
-          mrOpts
-        );
+      if (_exists(mr.context)) {
+        mrOpts.scope = mr.context;
+      }
+      if (_exists(mr.finalize)) {
+        mrOpts.finalize = mr.finalize;
+      }
+      results = collection.mapReduce.sync(
+        collection,
+        mr.map,
+        mr.reduce,
+        mrOpts
+      );
+    } else {
+      if (doFindOne) {
+        opts.limit = 1;
+      }
+      if (fieldInclExcl !== null) {
+        cursor = collection.find.sync(collection, query, fieldInclExcl, opts);
       } else {
-        if (doFindOne) {
-          opts.limit = 1;
+        cursor = collection.find.sync(collection, query, opts);
+      }
+
+      if (doCount) {
+        results = cursor.count.sync(cursor);
+      } else {
+        results = cursor.toArray.sync(cursor);
+        resultCount = Object.keys(results).length;
+
+        if (resultCount > 1000) {
+          console.log(_c.yellow + 'warning: query',
+                      entity,
+                      '->',
+                      query,
+                      'returned',
+                      resultCount,
+                      'results, may impact server performance negatively. try to optimize the query!',
+                      _c.reset);
         }
-        if (fieldInclExcl !== null) {
-          cursor = collection.find.sync(collection, query, fieldInclExcl, opts);
-        } else {
-          cursor = collection.find.sync(collection, query, opts);
-        }
 
-        if (doCount) {
-          results = cursor.count.sync(cursor);
-        } else {
-          results = cursor.toArray.sync(cursor);
-          resultCount = Object.keys(results).length;
-
-          if (resultCount > 1000) {
-            console.log(_c.yellow + 'warning: query',
-                        entity,
-                        '->',
-                        query,
-                        'returned',
-                        resultCount,
-                        'results, may impact server performance negatively. try to optimize the query!',
-                        _c.reset);
-          }
-
-          for (i in results) {
-            if (results.hasOwnProperty(i)) {
-              for (j in refIncl) {
-                if (refIncl.hasOwnProperty(j)) {
-                  result = results[i];
-                  field = refIncl[j];
-                  dbRef = result[field];
-                  try {
-                    resolved = _db.dereference.sync(_db, dbRef);
-                    if (_def(resolved)) {
-                      result[field] = resolved;
-                    }
-                  } catch (refErr) {
-                    // stub, could not resolve reference
+        for (i in results) {
+          if (results.hasOwnProperty(i)) {
+            for (j in refIncl) {
+              if (refIncl.hasOwnProperty(j)) {
+                result = results[i];
+                field = refIncl[j];
+                dbRef = result[field];
+                try {
+                  resolved = _db.dereference.sync(_db, dbRef);
+                  if (_def(resolved)) {
+                    result[field] = resolved;
                   }
+                } catch (refErr) {
+                  // stub, could not resolve reference
                 }
               }
             }
           }
         }
       }
-
-      _encodeDkObj(results);
-
-      return res.json(results, 200);
-    } catch (e) {
-      console.error(e);
-      return _e(res, _ERR.OPERATION_FAILED, e);
     }
-  });
+
+    _encodeDkObj(results);
+
+    return res.json(results, 200);
+  } catch (e) {
+    console.error(e);
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
 };
 exports.index = function (req, res) {
-  doSync(function indexSync() {
-    var entity, key, unique, drop, opts, collection, cursor;
-    entity = req.param('entity', null);
-    key = req.param('key', null);
-    unique = req.param('unique', false);
-    drop = req.param('drop', false);
-    if (!_exists(entity)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    if (!_exists(key)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    try {
-      opts = {
-        'safe': true,
-        'unique': unique,
-        'dropDups': drop
-      };
-      collection = _db.collection.sync(_db, entity);
-      cursor = collection.ensureIndex.sync(collection, {key: 1}, opts);
+  var entity, key, unique, drop, opts, collection, cursor;
+  entity = req.param('entity', null);
+  key = req.param('key', null);
+  unique = req.param('unique', false);
+  drop = req.param('drop', false);
+  if (!_exists(entity)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  if (!_exists(key)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  try {
+    opts = {
+      'safe': true,
+      'unique': unique,
+      'dropDups': drop
+    };
+    collection = _db.collection.sync(_db, entity);
+    cursor = collection.ensureIndex.sync(collection, {key: 1}, opts);
 
-      return res.send('', 200);
-    } catch (e) {
-      return _e(res, _ERR.OPERATION_FAILED, e);
-    }
-  });
+    return res.send('', 200);
+  } catch (e) {
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
 };
 exports.destroy = function (req, res) {
-  doSync(function destroySync() {
-    if (!_conf.allowDestroy) {
-      return _e(res, _ERR.OPERATION_NOT_ALLOWED);
-    }
-    var entity, collection;
-    entity = req.param('entity', null);
-    if (!_exists(entity)) {
-      return _e(res, _ERR.INVALID_PARAMS);
-    }
-    try {
-      collection = _db.collection.sync(_db, entity);
-      collection.drop.sync(collection);
+  if (!_conf.allowDestroy) {
+    return _e(res, _ERR.OPERATION_NOT_ALLOWED);
+  }
+  var entity, collection;
+  entity = req.param('entity', null);
+  if (!_exists(entity)) {
+    return _e(res, _ERR.INVALID_PARAMS);
+  }
+  try {
+    collection = _db.collection.sync(_db, entity);
+    collection.drop.sync(collection);
 
-      return res.send('', 200);
-    } catch (e) {
-      return _e(res, _ERR.OPERATION_FAILED, e);
-    }
-  });
+    return res.send('', 200);
+  } catch (e) {
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
 };
 exports.drop = function (req, res) {
-  doSync(function dropSync() {
-    if (_conf.allowDrop) {
-      try {
-        _db.dropDatabase.sync(_db);
-        console.log("dropped database", _db.databaseName);
-        res.send('', 200);
-      } catch (e) {
-        console.error(e);
-        _e(res, _ERR.OPERATION_FAILED, e);
-      }
-    } else {
-      _e(res, _ERR.OPERATION_NOT_ALLOWED);
-    }
-  });
-};
-exports.store = function (req, res) {
-  doSync(function storeSync() {
-    // Get filename and mode
-    var fileName, store, bufs, onEnd, onClose, onCancel, isClosing, pendingWrites, tick, gs, exists;
-    fileName = req.header('x-datakit-filename', null);
-
-    // Generate filename if neccessary, else check for conflict
-    if (fileName === null) {
-      fileName = uuid.v4();
-    }
-
-    store = null;
-    bufs = [];
-    onEnd = false;
-    onClose = false;
-    onCancel = false;
-    isClosing = false;
-    pendingWrites = 0;
-    tick = function (data) {
-      if (data && !(onClose || onCancel)) {
-        bufs.push(data);
-      }
-      if (pendingWrites <= 0 && bufs.length === 0 && (onClose || onEnd || onCancel)) {
-        if (!isClosing) {
-          isClosing = true;
-          store.close(function () {
-            if (onClose) {
-              console.log("connection closed, unlink file");
-              // Remove the file if stream was closed prematurely
-              mongo.GridStore.unlink(_db, fileName, function (err) {
-                res.send('', 400);
-              });
-            } else if (onEnd) {
-              res.writeHead(200, {
-                'x-datakit-assigned-filename': fileName
-              });
-              res.end();
-            }
-            store = null;
-          });
-        }
-      }
-      if (store !== null && bufs.length > 0 && pendingWrites <= 0) {
-        pendingWrites += 1;
-        store.write(bufs.shift(), function (err, success) {
-          if (err) {
-            console.error('error: could not write chunk (', err, ')');
-          }
-          pendingWrites -= 1;
-          tick();
-        });
-      }
-    };
-
-    // Register handlers
-    req.on('end', function () {
-      onEnd = true;
-      tick(null);
-    });
-    req.on('close', function () {
-      onClose = true;
-      tick(null);
-    });
-    req.on('data', function (data) {
-      tick(data);
-    });
-
-    // Check if file exists
+  if (_conf.allowDrop) {
     try {
-      exists = mongo.GridStore.exist.sync(mongo.GridStore, _db, fileName);
-      if (exists) {
-        return _e(res, _ERR.DUPLICATE_KEY);
-      }
+      _db.dropDatabase.sync(_db);
+      console.log("dropped database", _db.databaseName);
+      res.send('', 200);
     } catch (e) {
       console.error(e);
-      return _e(res, _ERR.OPERATION_FAILED, e);
+      _e(res, _ERR.OPERATION_FAILED, e);
     }
+  } else {
+    _e(res, _ERR.OPERATION_NOT_ALLOWED);
+  }
+};
+exports.store = function (req, res) {
+  // Get filename and mode
+  var fileName, store, bufs, onEnd, onClose, onCancel, isClosing, pendingWrites, tick, gs, exists;
+  fileName = req.header('x-datakit-filename', null);
 
-    // Pipe to GridFS
-    gs = new mongo.GridStore(_db, fileName, 'w+', {
-      // Generally the chunk size doesn't matter much,
-      // we just use a smaller chunk size to verify file
-      // integrity when testing.
-      'chunkSize': 1024 * 50
-    });
-    gs.open(function (err, s) {
-      if (err) {
-        console.log(err);
-        bufs = [];
-        onCancel = true;
-        return _e(res, _ERR.OPERATION_FAILED, err);
+  // Generate filename if neccessary, else check for conflict
+  if (fileName === null) {
+    fileName = uuid.v4();
+  }
+
+  store = null;
+  bufs = [];
+  onEnd = false;
+  onClose = false;
+  onCancel = false;
+  isClosing = false;
+  pendingWrites = 0;
+  tick = function (data) {
+    if (data && !(onClose || onCancel)) {
+      bufs.push(data);
+    }
+    if (pendingWrites <= 0 && bufs.length === 0 && (onClose || onEnd || onCancel)) {
+      if (!isClosing) {
+        isClosing = true;
+        store.close(function () {
+          if (onClose) {
+            console.log("connection closed, unlink file");
+            // Remove the file if stream was closed prematurely
+            mongo.GridStore.unlink(_db, fileName, function (err) {
+              res.send('', 400);
+            });
+          } else if (onEnd) {
+            res.writeHead(200, {
+              'x-datakit-assigned-filename': fileName
+            });
+            res.end();
+          }
+          store = null;
+        });
       }
-      store = s;
-      tick();
-    });
+    }
+    if (store !== null && bufs.length > 0 && pendingWrites <= 0) {
+      pendingWrites += 1;
+      store.write(bufs.shift(), function (err, success) {
+        if (err) {
+          console.error('error: could not write chunk (', err, ')');
+        }
+        pendingWrites -= 1;
+        tick();
+      });
+    }
+  };
+
+  // Register handlers
+  req.on('end', function () {
+    onEnd = true;
+    tick(null);
+  });
+  req.on('close', function () {
+    onClose = true;
+    tick(null);
+  });
+  req.on('data', function (data) {
+    tick(data);
+  });
+
+  // Check if file exists
+  try {
+    exists = mongo.GridStore.exist.sync(mongo.GridStore, _db, fileName);
+    if (exists) {
+      return _e(res, _ERR.DUPLICATE_KEY);
+    }
+  } catch (e) {
+    console.error(e);
+    return _e(res, _ERR.OPERATION_FAILED, e);
+  }
+
+  // Pipe to GridFS
+  gs = new mongo.GridStore(_db, fileName, 'w+', {
+    // Generally the chunk size doesn't matter much,
+    // we just use a smaller chunk size to verify file
+    // integrity when testing.
+    'chunkSize': 1024 * 50
+  });
+  gs.open(function (err, s) {
+    if (err) {
+      console.log(err);
+      bufs = [];
+      onCancel = true;
+      return _e(res, _ERR.OPERATION_FAILED, err);
+    }
+    store = s;
+    tick();
   });
 };
 exports.unlink = function (req, res) {
-  doSync(function unlinkSync() {
-    var files, i, gs, lastErr;
-    files = req.param('files', []);
-    gs = mongo.GridStore;
-    lastErr = null;
-    for (i = 0; i < files.length; i += 1) {
-      try {
-        gs.unlink.sync(gs, _db, files[i]);
-      } catch (e) {
-        lastErr = e;
-      }
+  var files, i, gs, lastErr;
+  files = req.param('files', []);
+  gs = mongo.GridStore;
+  lastErr = null;
+  for (i = 0; i < files.length; i += 1) {
+    try {
+      gs.unlink.sync(gs, _db, files[i]);
+    } catch (e) {
+      lastErr = e;
     }
-    if (lastErr !== null) {
-      return _e(res, _ERR.OPERATION_FAILED, lastErr);
-    }
-    return res.send('', 200);
-  });
+  }
+  if (lastErr !== null) {
+    return _e(res, _ERR.OPERATION_FAILED, lastErr);
+  }
+  return res.send('', 200);
 };
 exports.stream = function (req, res) {
-  doSync(function streamSync() {
-    _streamFileFromGridFS(req, res, req.header('x-datakit-filename', null));
-  });
+  _streamFileFromGridFS(req, res, req.header('x-datakit-filename', null));
 };
 exports.exists = function (req, res) {
-  doSync(function existsSync() {
-    var fileName, gs, exists;
-    fileName = req.param('fileName', null);
-    if (fileName) {
-      gs = mongo.GridStore;
-      try {
-        exists = gs.exist.sync(gs, _db, fileName);
-        if (exists) {
-          return res.send('', 200);
-        }
-      } catch (e) {
-        console.error(e);
-        return _e(res, _ERR.OPERATION_FAILED, e);
+  var fileName, gs, exists;
+  fileName = req.param('fileName', null);
+  if (fileName) {
+    gs = mongo.GridStore;
+    try {
+      exists = gs.exist.sync(gs, _db, fileName);
+      if (exists) {
+        return res.send('', 200);
       }
+    } catch (e) {
+      console.error(e);
+      return _e(res, _ERR.OPERATION_FAILED, e);
     }
-    return _e(res, _ERR.DUPLICATE_KEY);
-  });
+  }
+  return _e(res, _ERR.DUPLICATE_KEY);
 };
 
 
