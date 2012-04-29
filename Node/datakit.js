@@ -67,7 +67,7 @@ var _method = function (name, secure) {
 
       secure = _safe(secure, true);
       secret = req.header('x-datakit-secret', null);
-      
+
       if (secure && secret !== _conf.secret) {
         res.header('WWW-Authenticate', 'datakit-secret');
         res.send(401);
@@ -77,7 +77,7 @@ var _method = function (name, secure) {
 
       // TODO: remove
       if (req.user) {
-        console.log("req.user =>", req.user, "secure =>", secure);  
+        console.log("req.user =>", req.user, "secure =>", secure);
       }
 
       return m(req, res);
