@@ -14,6 +14,8 @@
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, copy, readonly) NSString *password;
 @property (nonatomic, copy, readonly) NSString *email;
+@property (nonatomic, readonly) BOOL isSignedIn;
+@property (nonatomic, copy, readonly) NSString *sessionToken;
 
 + (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
 + (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;

@@ -32,19 +32,30 @@ var _exists = function (v) {
 var _safe = function (v, d) {
   return _def(v) ? v : d;
 };
-var _m = function (m) {
-  // console.log("invoking", m);
-  return exports[m];
-};
-var _secureMethod = function (m) {
+var _method = function (name, secure) {
   return function (req, res) {
-    var s = req.header('x-datakit-secret', null);
-    if (_exists(s) && s === _conf.secret) {
-      return _m(m)(req, res);
+    var m = exports[name];
+    req.dkSession = req.header('x-datakit-session', null);
+    // if (m.session) {
+    //   TODO: load user
+    // }
+    req.dkSecure = _safe(secure, true);
+    req.dkSecret = req.header('x-datakit-secret', null);
+    if (secure && req.dkSecret !== _conf.secret) {
+      res.header('WWW-Authenticate', 'datakit-secret');
+      res.send(401);
+
+      return;
     }
-    res.header('WWW-Authenticate', 'datakit-secret');
-    res.send(401);
+
+    // TODO: remove
+    console.log("sess =>", req.dkSession, "secure =>", req.dkSecure);
+
+    return m(req, res);
   };
+};
+var _secureMethod = function (name) {
+  return _method(name, true);
 };
 var _mkdirs = function (dirs, mode, cb) {
   var f = function next(e) {
@@ -60,8 +71,8 @@ var _createRoutes = function (path) {
   var m = function (p) {
     return path + '/' + _safe(p, '');
   };
-  app.get(m(), _m('info'));
-  app.get(m('public/:key'), _m('getPublishedObject'));
+  app.get(m(), _method('info'));
+  app.get(m('public/:key'), _method('getPublishedObject'));
   app.post(m('signUp'), _secureMethod('signUp'));
   app.post(m('signIn'), _secureMethod('signIn'));
   app.post(m('publish'), _secureMethod('publishObject'));

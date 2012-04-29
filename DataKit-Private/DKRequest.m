@@ -8,6 +8,7 @@
 
 #import "DKRequest.h"
 
+#import "DKUser.h"
 #import "DKManager.h"
 #import "DKRelation.h"
 #import "NSError+DataKit.h"
@@ -90,6 +91,12 @@ DKSynthesize(cachePolicy)
   }
   [req setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
   [req setValue:[DKManager APISecret] forHTTPHeaderField:kDKRequestHeaderSecret];
+  
+  // Check if a user session is active
+  DKUser *user = [DKUser currentUser];
+  if (user.isSignedIn) {
+    [req setValue:user.sessionToken forHTTPHeaderField:kDKRequestHeaderSession];
+  }
   
   // DEVNOTE: Allow untrusted certs in debug version.
   // This has to be excluded in production versions - private API!

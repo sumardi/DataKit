@@ -171,6 +171,10 @@ DKSynthesize(sessionToken)
   return [DKKeychain removePasswordForService:kDKUserKeychainServiceName account:nil error:error];
 }
 
+- (BOOL)isSignedIn {
+  return (self.sessionToken.length > 0);
+}
+
 - (NSString *)name {
   return [[self objectForKey:kDKUserNameField] copy];
 }

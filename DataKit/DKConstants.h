@@ -37,5 +37,6 @@ enum {
 typedef NSInteger DKRegexOption;
 
 #define kDKRequestHeaderSecret @"x-datakit-secret"
+#define kDKRequestHeaderSession @"x-datakit-session"
 #define kDKRequestHeaderFileName @"x-datakit-filename"
 #define kDKRequestHeaderAssignedFileName @"x-datakit-assigned-filename"
