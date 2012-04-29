@@ -21,6 +21,24 @@ var uuid = require('node-uuid');
 var app = {};
 
 // private functions
+var _DKSPLASH = "\
+       _____     ______     ______   ______     __  __     __     ______\n\
+      /\\  __-.  /\\  __ \\   /\\__  _\\ /\\  __ \\   /\\ \\/ /    /\\ \\   /\\__  _\\\n\
+      \\ \\ \\/\\ \\ \\ \\  __ \\  \\/_/\\ \\/ \\ \\  __ \\  \\ \\  _\"-.  \\ \\ \\  \\/_/\\ \\/\n\
+       \\ \\____-  \\ \\_\\ \\_\\    \\ \\_\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\  \\ \\_\\    \\ \\_\\\n\
+        \\/____/   \\/_/\\/_/     \\/_/   \\/_/\\/_/   \\/_/\\/_/   \\/_/     \\/_/\n\
+";
+var _DKDB = {
+  PUBLIC_OBJECTS: 'datakit.pub',
+  SEQENCE: 'datakit.seq',
+  USERS: 'datakit.users'
+};
+var _ERR = {
+  INVALID_PARAMS: [100, 'Invalid parameters'],
+  OPERATION_FAILED: [101, 'Operation failed'],
+  OPERATION_NOT_ALLOWED: [102, 'Operation not allowed'],
+  DUPLICATE_KEY: [103, 'Duplicate key']
+};
 var _conf = {};
 var _db = {};
 var _def = function (v) {
@@ -35,16 +53,21 @@ var _safe = function (v, d) {
 var _method = function (name, secure) {
   return function (req, res) {
     doSync(function syncMethod() {
-      var m, s, secret;
+      var m, s, secret, col;
       m = exports[name];
       s = req.header('x-datakit-session', null);
       if (s) {
-        req.user = "user:erik"; // TODO: fetch from db
+        try {
+          col = _db.collection.sync(_db, _DKDB.USERS);
+          req.user = col.findOne.sync(col, {'sid': s});
+        } catch (e) {
+          console.error("error: could not get session user (", e, ")");
+        }
       }
+
       secure = _safe(secure, true);
       secret = req.header('x-datakit-secret', null);
-
-      console.log(name, ": secret =>", secret);
+      
       if (secure && secret !== _conf.secret) {
         res.header('WWW-Authenticate', 'datakit-secret');
         res.send(401);
@@ -53,7 +76,9 @@ var _method = function (name, secure) {
       }
 
       // TODO: remove
-      console.log("req.user =>", req.user, "secure =>", secure);
+      if (req.user) {
+        console.log("req.user =>", req.user, "secure =>", secure);  
+      }
 
       return m(req, res);
     });
@@ -129,24 +154,6 @@ var _c = {
   blue: '\u001b[34m',
   purple: '\u001b[34m',
   reset: '\u001b[0m'
-};
-var _DKSPLASH = "\
-       _____     ______     ______   ______     __  __     __     ______\n\
-      /\\  __-.  /\\  __ \\   /\\__  _\\ /\\  __ \\   /\\ \\/ /    /\\ \\   /\\__  _\\\n\
-      \\ \\ \\/\\ \\ \\ \\  __ \\  \\/_/\\ \\/ \\ \\  __ \\  \\ \\  _\"-.  \\ \\ \\  \\/_/\\ \\/\n\
-       \\ \\____-  \\ \\_\\ \\_\\    \\ \\_\\  \\ \\_\\ \\_\\  \\ \\_\\ \\_\\  \\ \\_\\    \\ \\_\\\n\
-        \\/____/   \\/_/\\/_/     \\/_/   \\/_/\\/_/   \\/_/\\/_/   \\/_/     \\/_/\n\
-";
-var _DKDB = {
-  PUBLIC_OBJECTS: 'datakit.pub',
-  SEQENCE: 'datakit.seq',
-  USERS: 'datakit.users'
-};
-var _ERR = {
-  INVALID_PARAMS: [100, 'Invalid parameters'],
-  OPERATION_FAILED: [101, 'Operation failed'],
-  OPERATION_NOT_ALLOWED: [102, 'Operation not allowed'],
-  DUPLICATE_KEY: [103, 'Duplicate key']
 };
 var _hash = function (a, s) {
   var h = crypto.createHash(a);
