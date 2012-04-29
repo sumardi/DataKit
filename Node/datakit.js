@@ -1,4 +1,4 @@
-/*jslint node: true, es5: true, nomen: true, regexp: true, indent: 2*/
+/*jslint node: true, es5: true, nomen: true, regexp: true, indent: 2, continue: true*/
 "use strict";
 
 /* @license
@@ -31,7 +31,7 @@ var _DKSPLASH = "\
 var _DKDB = {
   PUBLIC_OBJECTS: 'datakit.pub',
   SEQENCE: 'datakit.seq',
-  USERS: 'datakit.users'
+  USERS: 'datakit.user'
 };
 var _ERR = {
   INVALID_PARAMS: [100, 'Invalid parameters'],
@@ -425,7 +425,7 @@ exports.signIn = function (req, res) {
     if (doc) {
       // TODO: remove log
       console.log("signed in:", uname, "sid =>", doc.sid);
-      return res.json(doc.sid, 200);
+      return res.json(doc, 200);
     }
   } catch (e) {
     console.error(e);
@@ -475,11 +475,7 @@ exports.publishObject = function (req, res) {
   }
 };
 exports.saveObject = function (req, res) {
-  // TODO: implement special considerations for DKUser entities
-  // - user entities may not be saved without existing object ids
-  // - existing user entities may only be saved by the signed in user himself
-  // - username (and other?) fields may not be saved/changed
-  var i, entities, results, errors, ent, entity, oidStr, fset, funset, finc, fpush, fpushAll, faddToSet, fpop, fpullAll, oid, ts, collection, doc, isNew, opts, update, ats, key;
+  var i, entities, results, errors, ent, entity, oidStr, fset, funset, finc, fpush, fpushAll, faddToSet, fpop, fpullAll, oid, ts, collection, doc, isNew, opts, update, ats, key, dfields, fi, f, err;
   entities = req.body;
   results = [];
   errors = [];
@@ -489,7 +485,8 @@ exports.saveObject = function (req, res) {
       ent = entities[i];
       entity = _safe(ent.entity, null);
       if (!_exists(entity)) {
-        return _e(res, _ERR.INVALID_PARAMS);
+        errors.push(new Error('Entity not set'));
+        continue;
       }
       oidStr = _safe(ent.oid, null);
       fset = _safe(ent.set, {});
@@ -502,6 +499,35 @@ exports.saveObject = function (req, res) {
       fpullAll = _safe(ent.pullAll, null);
       oid = null;
 
+      // Check if the entity is a user and apply special constraints
+      // - user entities may not be saved without existing object ids
+      // - existing user entities may only be saved by the signed in user himself
+      // - username (and other?) fields may not be saved/changed
+      if (entity === _DKDB.USERS) {
+        // Allow modification of an user entity only by the user himself
+        if (!req.user || oidStr !== req.user._id.toString()) {
+          errors.push(new Error('Cannot create user manually, need to sign up first'));
+          continue;
+        }
+
+        // Prevent changing special fields
+        dfields = ['name', 'email', '_id', '_seq', '_updated'];
+        err = null;
+        for (fi in dfields) {
+          if (dfields.hasOwnProperty(fi)) {
+            f = dfields[fi];
+            if (fset[f] || (funset && funset[f])) {
+              err = new Error('You may not modify the ' + f + ' field');
+              break;
+            }
+          }
+        }
+        if (err) {
+          errors.push(err);
+          continue;
+        }
+      }
+
       _decodeDkObj(fset);
       _decodeDkObj(fpush);
       _decodeDkObj(fpushAll);
@@ -511,7 +537,8 @@ exports.saveObject = function (req, res) {
       if (_exists(oidStr)) {
         oid = new mongo.ObjectID(oidStr);
         if (!_exists(oid)) {
-          return _e(res, _ERR.INVALID_PARAMS);
+          errors.push('Invalid entity ID');
+          continue;
         }
       }
       try {

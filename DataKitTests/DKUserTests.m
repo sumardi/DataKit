@@ -11,6 +11,7 @@
 #import "DataKit.h"
 #import "DKTests.h"
 #import "DKUser-Private.h"
+#import "DKEntity-Private.h"
 
 @implementation DKUserTests
 
@@ -22,7 +23,7 @@
 - (void)testUserSignUp {
   // Drop old users
   NSError *dropError = nil;
-  BOOL dropped = [DKManager dropDatabase:@"datakit.users" error:&dropError];
+  BOOL dropped = [DKManager dropDatabase:@"datakit.user" error:&dropError];
   
   STAssertTrue(dropped, nil);
   STAssertNil(dropError, dropError.localizedDescription);
@@ -87,7 +88,7 @@
 - (void)testSignIn {
   // Drop old users
   NSError *dropError = nil;
-  BOOL dropped = [DKManager dropDatabase:@"datakit.users" error:&dropError];
+  BOOL dropped = [DKManager dropDatabase:@"datakit.user" error:&dropError];
   
   STAssertTrue(dropped, nil);
   STAssertNil(dropError, dropError.localizedDescription);
@@ -112,6 +113,17 @@
   STAssertTrue(success, nil);
   STAssertNil(error, error.localizedDescription);
   
+  // Try to create user without signup method
+  DKUser *manualUser = [DKUser entityWithName:@"datakit.user"];
+  [manualUser setObject:@"ManualUser" forKey:@"name"];
+  [manualUser setObject:@"mypasswdx" forKey:@"passwd"];
+  
+  error = nil;
+  success = [manualUser save:&error];
+  
+  STAssertFalse(success, nil);
+  STAssertNotNil(error, nil);
+  
   // Sign in with wrong credentials
   error = nil;
   success = [DKUser signInUserWithName:uname password:@"wrongpassword" error:&error];
@@ -132,8 +144,8 @@
   // Check current user (should be user 1)
   DKUser *user = [DKUser currentUser];
 
-  STAssertNil(user.password, nil);
   STAssertEqualObjects(user.name, uname, nil);
+  STAssertTrue(user.password.length > 0, nil);
   STAssertTrue(user.sessionToken.length > 0, nil);
   
   // Sign in with user 2
@@ -146,10 +158,29 @@
   // Check current user (should be user 2)
   DKUser *user2 = [DKUser currentUser];
   
-  STAssertNil(user2.password, nil);
   STAssertEqualObjects(user2.name, uname2, nil);
+  STAssertTrue(user2.password.length > 0, nil);
   STAssertTrue(user2.sessionToken.length > 0, nil);
   STAssertFalse([user.sessionToken isEqualToString:user2.sessionToken], nil);
+  
+  // Save custom property
+  [user2 setObject:@"customValue" forKey:@"myval"];
+  
+  error = nil;
+  success = [user2 save:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  STAssertEqualObjects([user2 objectForKey:@"myval"], @"customValue", nil);
+  
+  // Save locked property
+  [user2 setObject:@"asdf" forKey:@"name"];
+  
+  error = nil;
+  success = [user2 save:&error];
+  
+  STAssertFalse(success, nil);
+  STAssertNotNil(error, nil);
   
   // Sign out
   error = nil;
