@@ -346,7 +346,7 @@ DKSynthesize(userInfo)
 
 - (BOOL)delete:(NSError **)error {
   // Check for valid object ID and entity name
-  if (!([self hasEntityId:error] &&
+  if (!(([self doesNotRequireEntityID] || [self hasEntityId:error]) &&
         [self hasEntityName:error])) {
     return NO;
   }
@@ -555,6 +555,10 @@ DKSynthesize(userInfo)
 @end
 
 @implementation DKEntity (Private)
+
+- (BOOL)doesNotRequireEntityID {
+  return NO;
+}
 
 - (BOOL)hasEntityId:(NSError **)error {
   if (self.entityId.length == 0) {

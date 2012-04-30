@@ -622,6 +622,15 @@ exports.deleteObject = function (req, res) {
   var entity, oidStr, oid, collection, result;
   entity = req.param('entity', null);
   oidStr = req.param('oid', null);
+
+  // User entities can only be deleted by owner (signed in)
+  if (entity === _DKDB.USERS) {
+    if (req.user) {
+      oidStr = req.user._id.toString();
+    } else {
+      oidStr = null;
+    }
+  }
   if (!_exists(entity)) {
     return _e(res, _ERR.INVALID_PARAMS);
   }

@@ -72,14 +72,14 @@
   return YES;
 }
 
-+ (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error {
++ (instancetype)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error {
   if (name.length == 0) {
     if (error != NULL) {
       NSDictionary *userInfo = [NSDictionary dictionaryWithObject:NSLocalizedString(@"Username invalid", nil) forKey:NSLocalizedDescriptionKey];
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:userInfo];
     }
     
-    return NO;
+    return nil;
   }
   if (password.length == 0) {
     if (error != NULL) {
@@ -87,7 +87,7 @@
       *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x102 userInfo:userInfo];
     }
     
-    return NO;
+    return nil;
   }
   
   // Request params
@@ -105,7 +105,7 @@
     if (error != nil) {
       *error = requestError;
     }
-    return NO;
+    return nil;
   }
   
   // Store user in keychain
@@ -124,10 +124,10 @@
   if (!success) {
     NSLog(@"error: could not store session in keychain (%i)", kcErr.code);
     
-    return NO;
+    return nil;
   }
   
-  return YES;
+  return [self currentUser];
 }
 
 + (instancetype)currentUser {
@@ -200,6 +200,18 @@
 
 - (void)setSessionToken:(NSString *)sessionToken {
   [self setObject:[sessionToken copy] forKey:kDKUserSessionField];
+}
+
+- (BOOL)delete:(NSError **)error {
+  BOOL success = [super delete:error];
+  if (success) {
+    [isa signOut:NULL];
+  }
+  return success;
+}
+
+- (BOOL)doesNotRequireEntityID {
+  return YES;
 }
 
 @end

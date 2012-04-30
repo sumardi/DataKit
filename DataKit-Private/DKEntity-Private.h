@@ -23,6 +23,7 @@
 
 @interface DKEntity (Private)
 
+- (BOOL)doesNotRequireEntityID;
 - (BOOL)hasEntityId:(NSError **)error;
 - (BOOL)hasEntityName:(NSError **)error;
 - (BOOL)commitObjectResultMap:(NSDictionary *)resultMap error:(NSError **)error;

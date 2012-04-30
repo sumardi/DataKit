@@ -126,9 +126,9 @@
   
   // Sign in with wrong credentials
   error = nil;
-  success = [DKUser signInUserWithName:uname password:@"wrongpassword" error:&error];
+  DKUser *curUser = [DKUser signInUserWithName:uname password:@"wrongpassword" error:&error];
   
-  STAssertFalse(success, nil);
+  STAssertNil(curUser, nil);
   STAssertNotNil(error, nil);
   if (error != nil) {
     NSLog(@"got error as expected: %@", error.localizedDescription);
@@ -136,9 +136,9 @@
 
   // Sign in with correct credentials
   error = nil;
-  success = [DKUser signInUserWithName:uname password:upasswd error:&error];
+  curUser = [DKUser signInUserWithName:uname password:upasswd error:&error];
   
-  STAssertTrue(success, nil);
+  STAssertNotNil(curUser, nil);
   STAssertNil(error, error.localizedDescription);
   
   // Check current user (should be user 1)
@@ -150,9 +150,9 @@
   
   // Sign in with user 2
   error = nil;
-  success = [DKUser signInUserWithName:uname2 password:upasswd2 error:&error];
+  curUser = [DKUser signInUserWithName:uname2 password:upasswd2 error:&error];
   
-  STAssertTrue(success, nil);
+  STAssertNotNil(curUser, nil);
   STAssertNil(error, error.localizedDescription);
   
   // Check current user (should be user 2)
@@ -192,6 +192,64 @@
   DKUser *user3 = [DKUser currentUser];
   
   STAssertNil(user3, nil);
+}
+
+- (void)testDelete {
+  // Drop old users
+  NSError *dropError = nil;
+  BOOL dropped = [DKManager dropDatabase:@"datakit.user" error:&dropError];
+  
+  STAssertTrue(dropped, nil);
+  STAssertNil(dropError, dropError.localizedDescription);
+  
+  // Create test users
+  NSError *error = nil;
+  BOOL success = [DKUser signUpUserWithName:@"user1" password:@"password" email:@"email" error:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  error = nil;
+  success = [DKUser signUpUserWithName:@"user2" password:@"password" email:@"email2" error:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  // Try to delete user when signed out
+  error = nil;
+  DKUser *curUser = [DKUser signInUserWithName:@"user2" password:@"password" error:&error];
+  
+  STAssertNotNil(curUser, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  error = nil;
+  success = [DKUser signOut:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  error = nil;
+  success = [curUser delete:&error];
+  
+  STAssertFalse(success, nil);
+  STAssertNotNil(error, nil);
+  
+  // Try to delete other user when signed in
+  error = nil;
+  curUser = [DKUser signInUserWithName:@"user2" password:@"password" error:&error];
+  
+  STAssertNotNil(curUser, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  error = nil;
+  success = [curUser delete:&error];
+  
+  STAssertTrue(success, nil);
+  STAssertNil(error, error.localizedDescription);
+  
+  curUser = [DKUser currentUser];
+  
+  STAssertNil(curUser, nil);
 }
 
 @end

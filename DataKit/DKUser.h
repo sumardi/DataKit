@@ -18,7 +18,7 @@
 @property (nonatomic, copy, readonly) NSString *sessionToken;
 
 + (BOOL)signUpUserWithName:(NSString *)name password:(NSString *)password email:(NSString *)email error:(NSError **)error;
-+ (BOOL)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
++ (instancetype)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
 + (instancetype)currentUser;
 + (BOOL)signOut:(NSError **)error;
 
