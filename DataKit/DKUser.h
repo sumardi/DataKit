@@ -24,16 +24,15 @@
 + (instancetype)signInUserWithName:(NSString *)name password:(NSString *)password error:(NSError **)error;
 + (instancetype)currentUser;
 + (BOOL)signOut:(NSError **)error;
++ (BOOL)deleteCurrentUser:(NSError **)error;
 
 + (BOOL)requestPasswordResetForUsername:(NSString *)name orEmail:(NSString *)email error:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
 
 /** @name Deleting Users */
 
-// TODO: Make clear in the docs that the delete methods do not delete the instance but the current user.
-
-- (BOOL)delete;
-- (BOOL)delete:(NSError **)error;
-- (void)deleteInBackground;
-- (void)deleteInBackgroundWithBlock:(void (^)(DKEntity *, NSError *))block;
+- (BOOL)delete UNAVAILABLE_ATTRIBUTE;
+- (BOOL)delete:(NSError **)error UNAVAILABLE_ATTRIBUTE;
+- (void)deleteInBackground UNAVAILABLE_ATTRIBUTE;
+- (void)deleteInBackgroundWithBlock:(void (^)(DKEntity *, NSError *))block UNAVAILABLE_ATTRIBUTE;
 
 @end

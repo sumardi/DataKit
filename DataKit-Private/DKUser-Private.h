@@ -13,4 +13,6 @@
 
 + (BOOL)userNameAndPasswordValid:(NSError **)error;
 
+- (BOOL)deleteCurrentUser:(NSError **)error;
+
 @end

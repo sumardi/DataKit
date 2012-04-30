@@ -166,6 +166,20 @@
   return [DKKeychain removePasswordForService:kDKUserKeychainServiceName account:nil error:error];
 }
 
++ (BOOL)deleteCurrentUser:(NSError **)error {
+  DKUser *currentUser = [self currentUser];
+  if (currentUser == nil) {
+    if (error != NULL) {
+      NSDictionary *infoDict = [NSDictionary dictionaryWithObject:NSLocalizedString(@"No current user", nil)
+                                                           forKey:NSLocalizedDescriptionKey];
+      *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0x100 userInfo:infoDict];
+    }
+    
+    return NO;
+  }
+  return [currentUser deleteCurrentUser:error];
+}
+
 - (BOOL)isSignedIn {
   return (self.sessionToken.length > 0);
 }
@@ -202,7 +216,7 @@
   [self setObject:[sessionToken copy] forKey:kDKUserSessionField];
 }
 
-- (BOOL)delete:(NSError **)error {
+- (BOOL)deleteCurrentUser:(NSError **)error {
   BOOL success = [super delete:error];
   if (success) {
     [isa signOut:NULL];

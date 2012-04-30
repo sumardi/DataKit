@@ -228,8 +228,12 @@
   STAssertTrue(success, nil);
   STAssertNil(error, error.localizedDescription);
   
+  curUser = [DKUser currentUser];
+  
+  STAssertNil(curUser, nil);
+  
   error = nil;
-  success = [curUser delete:&error];
+  success = [DKUser deleteCurrentUser:&error];
   
   STAssertFalse(success, nil);
   STAssertNotNil(error, nil);
@@ -242,7 +246,7 @@
   STAssertNil(error, error.localizedDescription);
   
   error = nil;
-  success = [curUser delete:&error];
+  success = [DKUser deleteCurrentUser:&error];
   
   STAssertTrue(success, nil);
   STAssertNil(error, error.localizedDescription);
