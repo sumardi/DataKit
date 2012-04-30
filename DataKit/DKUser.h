@@ -10,6 +10,9 @@
 
 #define UNIMPLEMENTED_ATTRIBUTE
 
+/**
+ Class for accessing the user auth system.
+ */
 @interface DKUser : DKEntity
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, copy, readonly) NSString *password;
@@ -23,5 +26,14 @@
 + (BOOL)signOut:(NSError **)error;
 
 + (BOOL)requestPasswordResetForUsername:(NSString *)name orEmail:(NSString *)email error:(NSError **)error UNIMPLEMENTED_ATTRIBUTE;
+
+/** @name Deleting Users */
+
+// TODO: Make clear in the docs that the delete methods do not delete the instance but the current user.
+
+- (BOOL)delete;
+- (BOOL)delete:(NSError **)error;
+- (void)deleteInBackground;
+- (void)deleteInBackgroundWithBlock:(void (^)(DKEntity *, NSError *))block;
 
 @end
