@@ -56,7 +56,7 @@ DKSynthesize(finalizeFunction)
       }
       return [assemble componentsJoinedByString:@"\n"];
     }
-    return nil;
+    return (NSString *)nil;
   };
   
   self.mapFunction = trim(mapFunc);
