@@ -168,7 +168,7 @@ DKSynthesize(bytesExpected)
   req.HTTPBody = self.data;
   req.HTTPMethod = @"POST";
   
-  NSString *contentLen = [NSString stringWithFormat:@"%lu", self.data.length];
+  NSString *contentLen = [NSString stringWithFormat:@"%u", self.data.length];
   
   [req setValue:contentLen forHTTPHeaderField:@"Content-Length"];
   [req setValue:@"application/octet-stream" forHTTPHeaderField:@"Content-Type"];
