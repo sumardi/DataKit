@@ -34,6 +34,8 @@ DKSynthesize(ands)
 DKSynthesize(referenceIncludes)
 DKSynthesize(fieldInclExcl)
 
+static const void * const DKDispatchQueueKey = &DKDispatchQueueKey;
+
 + (DKQuery *)queryWithEntityName:(NSString *)entityName {
   return [[self alloc] initWithEntityName:entityName];
 }
@@ -331,7 +333,7 @@ DKSynthesize(fieldInclExcl)
 }
 
 - (void)findAllInBackgroundWithBlock:(void (^)(NSArray *results, NSError *error))block {
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     NSArray *entities = [self findAll:&error];
@@ -356,7 +358,7 @@ DKSynthesize(fieldInclExcl)
 }
 
 - (void)findOneInBackgroundWithBlock:(void (^)(DKEntity *entity, NSError *error))block {
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     DKEntity *entity = [self findOne:&error];
@@ -381,7 +383,7 @@ DKSynthesize(fieldInclExcl)
 }
 
 - (void)performMapReduce:(DKMapReduce *)mapReduce inBackgroundWithBlock:(void (^)(id result, NSError *error))block {
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     id result = [self performMapReduce:mapReduce error:&error];
@@ -404,7 +406,7 @@ DKSynthesize(fieldInclExcl)
 }
 
 - (void)countAllInBackgroundWithBlock:(void (^)(NSUInteger count, NSError *error))block {
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     NSUInteger count = [self countAll:&error];

@@ -37,6 +37,8 @@ DKSynthesize(searchTextChanged)
 DKSynthesize(hasMore)
 DKSynthesize(currentOffset)
 
+static const void * const DKDispatchQueueKey = &DKDispatchQueueKey;
+
 - (id)initWithEntityName:(NSString *)entityName {
   return [self initWithStyle:UITableViewStylePlain entityName:entityName];
 }
@@ -64,7 +66,7 @@ DKSynthesize(currentOffset)
 }
 
 - (void)processQueryResults:(NSArray *)results error:(NSError *)error callback:(void (^)(NSError *error))callback {
-  NSAssert(dispatch_get_current_queue() == dispatch_get_main_queue(), @"query results not processed on main queue");
+  NSAssert((__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey)) == dispatch_get_main_queue(), @"query results not processed on main queue");
   
   if (results != nil && ![results isKindOfClass:[NSArray class]]) {
     [NSException raise:NSInternalInconsistencyException
@@ -99,7 +101,7 @@ DKSynthesize(currentOffset)
   }
   
   // Post process results
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
     [self postProcessResults];

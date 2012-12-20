@@ -30,6 +30,8 @@ DKSynthesize(userInfo)
 #define kDKEntityIDField @"_id"
 #define kDKEntityUpdatedField @"_updated"
 
+static const void * const DKDispatchQueueKey = &DKDispatchQueueKey;
+
 + (DKEntity *)entityWithName:(NSString *)entityName {
   return [[self alloc] initWithName:entityName];
 }
@@ -149,7 +151,7 @@ DKSynthesize(userInfo)
 
 + (void)saveAllInBackground:(NSArray *)objects withBlock:(void (^)(NSArray *entities, NSError *error))block {
   block = [block copy];
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     [self saveAll:objects error:&error];
@@ -278,7 +280,7 @@ DKSynthesize(userInfo)
 
 - (void)saveInBackgroundWithBlock:(void (^)(DKEntity *entity, NSError *error))block {
   block = [block copy];
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     [self save:&error];
@@ -328,7 +330,7 @@ DKSynthesize(userInfo)
 
 - (void)refreshInBackgroundWithBlock:(void (^)(DKEntity *entity, NSError *error))block {
   block = [block copy];
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     [self refresh:&error];
@@ -383,7 +385,7 @@ DKSynthesize(userInfo)
 
 - (void)deleteInBackgroundWithBlock:(void (^)(DKEntity *entity, NSError *error))block {
   block = [block copy];
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     [self delete:&error];
@@ -529,7 +531,7 @@ DKSynthesize(userInfo)
 
 - (void)generatePublicURLForFields:(NSArray *)fieldKeys inBackgroundWithBlock:(void (^)(NSURL *publicURL, NSError *error))block {
   block = [block copy];
-  dispatch_queue_t q = dispatch_get_current_queue();
+  dispatch_queue_t q = (__bridge dispatch_queue_t)(dispatch_get_specific(DKDispatchQueueKey));
   dispatch_async([DKManager queue], ^{
     NSError *error = nil;
     NSURL *url = [self generatePublicURLForFields:fieldKeys error:&error];
