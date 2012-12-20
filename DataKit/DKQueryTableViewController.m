@@ -351,9 +351,15 @@ DKSynthesize(activityAccessoryView)
   NSString *text = self.textLabel.text;
   
   CGRect bounds = self.bounds;
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 60000
+    NSLineBreakMode lbm = NSLineBreakByTruncatingTail;
+#else
+    UILineBreakMode lbm = UILineBreakModeTailTruncation;
+#endif
   CGSize textSize = [text sizeWithFont:font
                               forWidth:CGRectGetWidth(bounds)
-                         lineBreakMode:UILineBreakModeTailTruncation];
+                         lineBreakMode:lbm];
   CGSize spinnerSize = self.activityAccessoryView.frame.size;
   CGFloat padding = 10.0;
   
